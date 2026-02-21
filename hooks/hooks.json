@@ -1,0 +1,18 @@
+{
+  "description": "claude-agent-kit hooks",
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "boulder",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/safe-gate.sh",
+            "timeout": 3600,
+            "statusMessage": "Running Safe gate (lint/test/build)"
+          }
+        ]
+      }
+    ]
+  }
+}
