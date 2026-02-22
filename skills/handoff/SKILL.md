@@ -1,0 +1,22 @@
+---
+name: handoff
+description: Create a detailed context summary for continuing work in a new session.
+---
+
+# Handoff
+
+Write a deterministic handoff file for continuation.
+
+## Execute
+1. Create `.sisyphus/handoff/` if missing.
+2. Write `.sisyphus/handoff/last.md` containing:
+   - active plan path
+   - current task
+   - unresolved errors (if known)
+   - resume command: `/omo:start-work`
+   - escape hatch: `/omo:stop-continuation`
+3. Avoid secrets or raw hook payloads.
+4. Print the handoff path and concise summary.
+
+## Constraints
+- Keep this inline (non-fork skill).

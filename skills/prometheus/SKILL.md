@@ -1,8 +1,18 @@
 ---
 name: prometheus
-description: Run Prometheus planner (read-only) to produce an executable plan.
-context: fork
-agent: prometheus
+description: Switch main-session persona to prometheus (planning discipline).
 ---
 
-Plan: $ARGUMENTS
+# Switch Persona: Prometheus
+
+Set runtime `activePersona` to `prometheus` in `.sisyphus/cc-omo/runtime.local.json` using inline execution.
+
+## Execute
+1. Ensure runtime file exists (create with `version=1` if needed).
+2. Set `sessions.<session_or_global>.activePersona="prometheus"`.
+3. Preserve all existing ulw/boulder/ralph related fields.
+4. Confirm planner-only discipline: markdown planning artifacts under `.sisyphus/` unless user explicitly requests execution.
+
+## Constraints
+- Do not use `context: fork`.
+- Keep planning markdown-focused.

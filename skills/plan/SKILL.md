@@ -1,16 +1,28 @@
 ---
 name: plan
-description: Produce an executable implementation plan with scope boundaries and verification steps.
-model: opus
+description: Create a durable, reviewable implementation plan for a complex task.
 ---
 
-Create an implementation plan for: $ARGUMENTS
+# Plan
 
-Include:
-- IN scope / OUT of scope
-- Assumptions
-- Tasks (dependency-ordered)
-- Verification commands (tests/lint/build)
-- Top 3 risks
+Generate a checklist plan and initialize boulder state.
 
-Keep it concrete: each task should name likely files/patterns to start from.
+## Execute
+1. Create `.sisyphus/plans/` if missing.
+2. Generate slug from `$ARGUMENTS` and current date.
+3. Write `.sisyphus/plans/<slug>.md` with sections:
+   - Context
+   - Tasks (`- [ ] 1. ...`)
+   - Verification
+4. Write `.sisyphus/boulder.json`:
+   - `version=1`
+   - `active=true`
+   - `status="in_progress"`
+   - `planPath=".sisyphus/plans/<slug>.md"`
+   - `currentTask` set to first unchecked task
+   - `updatedAt=<now>`
+5. Print: plan path, current task, and reminder to run `/omo:start-work`.
+
+## Constraints
+- Planning output should be markdown-first.
+- Keep this inline (non-fork skill).

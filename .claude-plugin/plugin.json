@@ -1,0 +1,6 @@
+{
+  "name": "omo",
+  "version": "0.1.0",
+  "description": "OMO-style orchestration workflows for Claude Code CLI",
+  "hooks": "./hooks/hooks.json"
+}
