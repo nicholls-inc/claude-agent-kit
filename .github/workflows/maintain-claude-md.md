@@ -50,7 +50,7 @@ When the codebase changes (new agents, renamed skills, updated hooks, changed co
    - `agents/*.md` (agent definitions)
    - `skills/*/SKILL.md` (skill definitions)
    - `hooks/hooks.json` (hook configuration)
-   - `scripts/safe-gate.sh` (safe gate logic)
+   - `scripts/*.sh` (hook router, state management, and other scripts)
    - `docs/routing.md` (model routing policy)
    - `docs/agent-mapping.md` (agent inventory)
    - `README.md` (project overview)

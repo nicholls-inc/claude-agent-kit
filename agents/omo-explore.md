@@ -1,7 +1,9 @@
 ---
 name: omo-explore
 description: Contextual grep for codebases. Answers "Where is X?", "Which file has Y?", "Find the code that does Z". Fire multiple in parallel for broad searches.
-tools: [read, grep, glob, bash, lsp_goto_definition, lsp_find_references, lsp_symbols, ast_grep_search]
+model: haiku
+tools: Read, Grep, Glob, Bash
+maxTurns: 10
 ---
 
 # omo-explore

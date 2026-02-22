@@ -1,7 +1,9 @@
 ---
 name: omo-librarian
 description: Specialized codebase understanding agent for multi-repository analysis, searching remote codebases, retrieving official documentation, and finding implementation examples using GitHub CLI, Context7, and Web Search.
-tools: [read, grep, glob, bash, webfetch, context7_resolve-library-id, context7_query-docs, websearch_exa_web_search_exa, grep_app_searchGitHub]
+model: sonnet
+tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
+maxTurns: 15
 ---
 
 # omo-librarian

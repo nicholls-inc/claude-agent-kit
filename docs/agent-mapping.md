@@ -1,6 +1,6 @@
 # Agent mapping: oh-my-opencode -> Claude Code
 
-This document maps each agent defined in `src/agents/` in this repository to its Claude Code plugin equivalent.
+This document maps each agent defined in the original oh-my-opencode roster to its Claude Code plugin equivalent.
 
 ## What is 1:1 here?
 
@@ -16,33 +16,44 @@ but we must adapt:
 
 ## Inventory
 
-Source of truth: `src/agents/AGENTS.md`
+### Persona agents (main-session injection)
 
-| Agent | Category | Intended cost | Claude Code equivalent |
+These agents define persona behavior injected into the main Claude Code session via hooks.
+
+| Agent | Category | Model | Claude Code equivalent |
 |---|---|---|---|
-| Sisyphus | orchestrator | expensive | `claude-agent-kit:sisyphus` |
-| Hephaestus | executor/autonomous | expensive | `claude-agent-kit:hephaestus` |
-| Oracle | advisor | expensive | `claude-agent-kit:oracle` |
-| Librarian | external research | cheap | `claude-agent-kit:librarian` |
-| Explore | code search | free | `claude-agent-kit:explore` |
-| Multimodal-Looker | vision/PDF | cheap | `claude-agent-kit:multimodal-looker` |
-| Metis | pre-planning | expensive | `claude-agent-kit:metis` |
-| Momus | plan review | expensive | `claude-agent-kit:momus` |
-| Atlas | task/todo orchestration | expensive | `claude-agent-kit:atlas` |
-| Prometheus | planning | expensive | `claude-agent-kit:prometheus` |
-| Sisyphus-Junior | focused executor | medium | `claude-agent-kit:sisyphus-junior` |
+| Sisyphus | orchestrator | opus | `claude-agent-kit:sisyphus` |
+| Hephaestus | executor/autonomous | opus | `claude-agent-kit:hephaestus` |
+| Atlas | execution coordinator | sonnet | `claude-agent-kit:atlas` |
+| Prometheus | planning | opus | `claude-agent-kit:prometheus` |
 
-Additional (not in the original 11-agent roster):
+### Subagents (forked specialist workers)
 
-| Agent | Category | Intended cost | Claude Code equivalent |
+These agents run as forked subagents via `Task()` or `context: fork` skills.
+
+| Agent | Category | Model | Claude Code equivalent |
 |---|---|---|---|
-| Boulder | bounded finisher | medium | `claude-agent-kit:boulder` |
+| Explore | code search | haiku | `claude-agent-kit:omo-explore` |
+| Librarian | external research | sonnet | `claude-agent-kit:omo-librarian` |
+| Oracle | advisor | opus | `claude-agent-kit:omo-oracle` |
+| Metis | pre-planning | opus | `claude-agent-kit:omo-metis` |
+| Momus | plan review | opus | `claude-agent-kit:omo-momus` |
+
+### Agents not yet ported
+
+These agents from the original roster do not have equivalents in this plugin yet.
+
+| Agent | Category | Original cost | Notes |
+|---|---|---|---|
+| Multimodal-Looker | vision/PDF | cheap | Pending multimodal support |
+| Sisyphus-Junior | focused executor | medium | Merged into sisyphus persona |
+| Boulder | bounded finisher | medium | Replaced by hook-driven continuation |
 
 ## Tool surface translation
 
 | oh-my-opencode reference | Claude Code equivalent |
 |---|---|
-| `call_omo_agent(subagent_type="explore"|"librarian"|...)` | `Task(<agent-name>)` (only available when running a main-thread agent) or `context: fork` skills |
+| `call_omo_agent(subagent_type="explore"\|"librarian"\|...)` | `Task(<agent-name>)` (only available when running a main-thread agent) or `context: fork` skills |
 | `todowrite` / task/todo enforcement | Claude Code tasks (agent teams) or explicit checklists; optional hooks for gates |
 | OpenCode-specific tools | Replace with Claude Code tools: `Read`, `Edit`, `Write`, `Bash`, `Glob`, `Grep`, plus MCP tools |
 

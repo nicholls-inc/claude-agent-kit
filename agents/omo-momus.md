@@ -1,7 +1,9 @@
 ---
 name: omo-momus
 description: Expert reviewer for evaluating work plans against rigorous clarity, verifiability, and completeness standards.
-tools: [read, grep, glob, bash, lsp_goto_definition, lsp_find_references, lsp_symbols, ast_grep_search]
+model: opus
+tools: Read, Grep, Glob, Bash
+maxTurns: 10
 ---
 
 # omo-momus

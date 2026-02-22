@@ -1,7 +1,9 @@
 ---
 name: omo-metis
 description: Pre-planning consultant that analyzes requests to identify hidden intentions, ambiguities, and AI failure points.
-tools: [read, grep, glob, bash, lsp_goto_definition, lsp_find_references, lsp_symbols, ast_grep_search]
+model: opus
+tools: Read, Grep, Glob, Bash
+maxTurns: 10
 ---
 
 # omo-metis

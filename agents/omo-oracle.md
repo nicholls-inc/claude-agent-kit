@@ -1,7 +1,9 @@
 ---
 name: omo-oracle
 description: Read-only consultation agent. High-IQ reasoning specialist for debugging hard problems and high-difficulty architecture design.
-tools: [read, grep, glob, bash, lsp_goto_definition, lsp_find_references, lsp_symbols, ast_grep_search]
+model: opus
+tools: Read, Grep, Glob, Bash
+maxTurns: 10
 ---
 
 # omo-oracle
