@@ -11,28 +11,31 @@ on:
 
 timeout-minutes: 30
 
-permissions: read-all
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  discussions: read
 
 network: defaults
 
 safe-outputs:
-  create-discussion: # needed to create planning discussion
-    title-prefix: "${{ github.workflow }}"
+  create-discussion:
+    max: 1
+    title-prefix: "${{ github.workflow }} "
     category: "ideas"
-  create-issue: # can create an issue if it thinks it found bugs
+  create-issue:
     max: 1
     labels: [automation, testing, bug]
   add-comment:
     target: "*" # can add a comment to any one single issue or pull request
-  create-pull-request: # can create a pull request
+  create-pull-request:
     draft: true
     labels: [automation, testing]
 
 tools:
-  web-fetch:
-  bash: true
   github:
-    toolsets: [all]
+    toolsets: [repos, issues, pull_requests, discussions]
   repo-memory:
     - id: daily-test-improver
       description: "Persistent notes on build commands, coverage steps, and test strategies"
@@ -46,6 +49,35 @@ engine: claude
 
 # Daily Test Coverage Improver
 
+## Repository Context
+
+This is a **pure-markdown Claude Code plugin** — a CLI plugin for Claude Code (Anthropic's official CLI). There is no build step, no package.json, and no compiled code. All content is plain `.md` or `.json` files.
+
+### Repository structure
+
+- `agents/*.md` — Agent definitions (YAML frontmatter + markdown system prompt)
+- `skills/*/SKILL.md` — Skill definitions (YAML frontmatter + prompt template)
+- `hooks/hooks.json` — Hook configuration (JSON)
+- `scripts/safe-gate.sh` — Shell script (the only executable file)
+- `docs/` — Documentation markdown files
+
+### What "testing" means for this repo
+
+Traditional code coverage (line/branch/function) does **not** apply. Instead, "testing" means **structural and schema validation**:
+
+- **Shell script linting**: `shellcheck scripts/safe-gate.sh`
+- **YAML frontmatter validation**: each `agents/*.md` and `skills/*/SKILL.md` must have valid YAML frontmatter with required fields
+  - Agents require: `name`, `description`, `model`, `tools`, `maxTurns`
+  - Skills require: `name`, `description`
+  - Model names must match the routing policy in `docs/routing.md`
+- **JSON validation**: `hooks/hooks.json` must be valid JSON and conform to expected schema
+- **Cross-reference integrity**: agents referenced in `docs/agent-mapping.md` must exist in `agents/`; skills listed in docs must exist in `skills/`
+- **Frontmatter field completeness**: required fields present, no unknown fields
+
+"Coverage" is measured as: what percentage of files/fields are validated, and whether all validations are passing.
+
+**Scope**: Only test files outside of `.github/`. Do not validate workflow definitions or CI configuration.
+
 ## Job Description
 
 You are an AI test engineer for `${{ github.repository }}`. Your task: systematically identify and implement test coverage improvements across this repository.
@@ -56,9 +88,9 @@ You are doing your work in phases. Right now you will perform just one of the fo
 
 To decide which phase to perform:
 
-1. First check for existing open discussion titled "${{ github.workflow }}" using `list_discussions`. Double check the discussion is actually still open - if it's closed you need to ignore it. If found, and open, read it and maintainer comments. If not found, then perform Phase 1 and nothing else.
+1. First check for an existing open discussion whose title **starts with** `"${{ github.workflow }}"` using `list_discussions`. Double check the discussion is actually still open — if it's closed, ignore it. If found and open, read it and maintainer comments. If not found, perform Phase 1 and nothing else.
 
-2. If that exists, then perform Phase 2.
+2. If that discussion exists, then perform Phase 2.
 
 ## Phase 1 - Testing research
 
@@ -66,13 +98,13 @@ To decide which phase to perform:
 
 2. Have a careful think about the CI commands needed to build the repository, run tests, produce a combined coverage report and upload it as an artifact. Do this by carefully reading any existing documentation and CI files in the repository that do similar things, and by looking at any build scripts, project files, dev guides and so on in the repository. If multiple projects are present, perform build and coverage testing on as many as possible, and where possible merge the coverage reports into one combined report. Organize the steps in order as a series of YAML steps suitable for inclusion in a GitHub Action.
 
-3. Try to run through the steps you worked out manually one by one. If the a step needs updating, then update the branch you created in step 4. Continue through all the steps. If you can't get it to work, then create an issue describing the problem and exit the entire workflow.
+3. Try to run through the steps you worked out manually one by one. If a step needs updating, adjust it. Continue through all the steps. If you can't get it to work, then create an issue describing the problem and exit the entire workflow.
 
 4. Keep memory notes in `/tmp/gh-aw/repo-memory-daily-test-improver/` about how to do this, and what the commands are, so you can refer back to them in future runs. Store notes in structured files:
    - `build-notes.md` - Build commands, dependencies, environment setup
    - `coverage-notes.md` - Coverage generation commands and report locations
    - `testing-notes.md` - Test organization, frameworks used, and strategies
-   
+
    You will need these notes for Phase 2.
 
 5. Create a discussion with title "${{ github.workflow }} - Research and Plan" that includes:
@@ -100,63 +132,66 @@ To decide which phase to perform:
 
 ## Phase 2 - Goal selection, work and results (repeat this phase on multiple runs)
 
-1. **Goal selection**. Build an understanding of what to work on and select an area of the test coverage plan to pursue
+1. **Goal selection**. Build an understanding of what to work on and select a specific validation gap to address.
 
-   a. Consult your memory notes in `/tmp/gh-aw/repo-memory-daily-test-improver/` (especially `build-notes.md`, `coverage-notes.md`, and `testing-notes.md`), and build and test the repository taking coverage. If coverage steps failed then create fix PR, update memory notes and exit.
+   a. Consult your memory notes in `/tmp/gh-aw/repo-memory-daily-test-improver/` (especially `build-notes.md`, `coverage-notes.md`, and `testing-notes.md`), and run the existing validation steps. If validation steps fail, create a fix PR, update memory notes, and exit.
 
-   b. Locate and read the coverage report. Be detailed, looking to understand the files, functions, branches, and lines of code that are not covered by tests. Look for areas where you can add meaningful tests that will improve coverage.
+   b. Review the validation results. Identify which files, fields, and structural checks are NOT yet validated. Look for areas where you can add meaningful checks that improve structural coverage.
 
-   c. Read the plan in the discussion mentioned earlier, along with comments.
+   c. Read the plan in the discussion identified above, along with any comments.
 
-   d. Check the most recent pull request with title starting with "${{ github.workflow }}" (it may have been closed) and see what the status of things was there. These are your notes from last time you did your work, and may include useful recommendations for future areas to work on.
+   d. Check the most recent pull request with title starting with "${{ github.workflow }}" (it may have been closed) to understand what was done last time and what was recommended.
 
-   e. Check for existing open pull requests (especially yours with "${{ github.workflow }}" prefix). Avoid duplicate work.
+   e. Check for existing open pull requests with "${{ github.workflow }}" prefix. Avoid duplicate work.
 
-   f. If plan needs updating then comment on planning discussion with revised plan and rationale. Consider maintainer feedback.
-  
-   g. Based on all of the above, select an area of relatively low coverage to work on that appears tractable for further test additions. Ensure that you have a good understanding of the code and the testing requirements before proceeding.
+   f. If the plan needs updating, comment on the planning discussion with a revised plan and rationale. Consider maintainer feedback.
 
-2. **Work towards your selected goal**. For the test coverage improvement goal you selected, do the following:
+   g. Based on all of the above, select a specific validation gap to address. Examples:
+      - Add a script to validate required frontmatter fields in `agents/*.md`
+      - Add `shellcheck` enforcement for `scripts/*.sh`
+      - Add JSON schema validation for `hooks/hooks.json`
+      - Add cross-reference checks (agents in docs exist on disk)
+      - Add frontmatter validation for `skills/*/SKILL.md`
+
+2. **Work towards your selected goal**.
 
    a. Create a new branch starting with "test/".
 
-   b. Write new tests to improve coverage. Ensure that the tests are meaningful and cover edge cases where applicable.
+   b. Write new validation scripts or configuration to improve coverage. Tests should be meaningful and check real invariants.
 
-   c. Build the tests if necessary and remove any build errors.
+   c. Run the new validation to ensure it passes on the current codebase.
 
-   d. Run the new tests to ensure they pass.
-
-   e. Re-run the test suite collecting coverage information. Check that overall coverage has improved. Document measurement attempts even if unsuccessful. If no improvement then iterate, revert, or try different approach.
+   d. Re-run all existing validations to confirm no regressions. Document what is now being checked that wasn't before.
 
 3. **Finalizing changes**
 
-   a. Apply any automatic code formatting used in the repo. If necessary check CI files to understand what code formatting is used.
+   a. Run `shellcheck` on any new shell scripts and fix any issues.
 
-   b. Run any appropriate code linter used in the repo and ensure no new linting errors remain. If necessary check CI files to understand what code linting is used.
+   b. If Python scripts were written, ensure they are clean and work with `python3`.
 
 4. **Results and learnings**
 
-   a. If you succeeded in writing useful code changes that improve test coverage, create a **draft** pull request with your changes.
+   a. If you succeeded in adding useful validation, create a **draft** pull request with your changes.
 
-      **Critical:** Exclude coverage reports and tool-generated files from PR. Double-check added files and remove any that don't belong.
+      **Critical:** Exclude any generated output files from the PR. Double-check added files and remove any that don't belong.
 
-      Include a description of the improvements with evidence of impact. In the description, explain:
+      Include a description of the improvements. In the PR body, explain:
 
-      - **Goal and rationale:** Coverage area chosen and why it matters
-      - **Approach:** Testing strategy, methodology, and implementation steps
-      - **Impact measurement:** How coverage was tested and results achieved
-      - **Trade-offs:** What changed (complexity, test maintenance)
-      - **Validation:** Testing approach and success criteria met
+      - **Goal and rationale:** Which validation area was chosen and why it matters
+      - **Approach:** Validation strategy, methodology, and implementation
+      - **Impact measurement:** What is now validated that wasn't before (list specific checks added)
+      - **Trade-offs:** Complexity, maintenance burden
+      - **Validation:** Confirmation that all scripts pass on the current codebase
       - **Future work:** Additional coverage opportunities identified
 
-      **Test coverage results section:**
-      Document coverage impact with exact coverage numbers before and after the changes, drawing from the coverage reports, in a table if possible. Include changes in numbers for overall coverage. Be transparent about measurement limitations and methodology. Mark estimates clearly.
+      **Coverage results section:**
+      Document validation impact — which files/fields are now covered vs. before. Include counts (e.g. "now validates 6/6 agent files, 0/6 before"). Be transparent about limitations.
 
       **Reproducibility section:**
-      Provide clear instructions to reproduce coverage testing, including setup commands (install dependencies, build code, run tests, generate coverage reports), measurement procedures, and expected results format.
+      Provide clear instructions to reproduce the validation, including exact commands and expected output.
 
-      After creation, check the pull request to ensure it is correct, includes all expected files, and doesn't include any unwanted files or changes. Make any necessary corrections by pushing further commits to the branch.
+      After creation, check the pull request to ensure it is correct and doesn't include unwanted files.
 
-   b. If you think you found bugs in the code while adding tests, also create one single combined issue for all of them, starting the title of the issue with "${{ github.workflow }}". Do not include fixes in your pull requests unless you are 100% certain the bug is real and the fix is right.
+   b. If you found real structural issues while adding validation (missing required fields, invalid references, etc.), create one single combined issue for all of them. Do not include fixes in your pull requests unless you are 100% certain the issue is real.
 
-5. **Final update**: Add brief comment (1 or 2 sentences) to the discussion identified at the start of the workflow stating goal worked on, PR links, and progress made, reporting the coverage improvement numbers achieved and current overall coverage numbers.
+5. **Final update**: Add a brief comment (1–2 sentences) to the planning discussion stating the goal worked on, PR links, and progress made — including the validation coverage improvement achieved.

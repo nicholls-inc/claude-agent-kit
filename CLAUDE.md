@@ -69,6 +69,14 @@ All models are Anthropic-only. The mapping:
 2. Use `$ARGUMENTS` in the prompt body for user input.
 3. Set `disable-model-invocation: true` for skills that should only be manually invoked.
 
+## Testing
+
+```bash
+./tests/validate.sh
+```
+
+Validates plugin structural contracts: agent/skill frontmatter (required fields, valid model values, cross-references), `hooks.json` schema, `safe-gate.sh` correctness, and bidirectional consistency between `agents/*.md` and `docs/agent-mapping.md`. Exits 0 on success, 1 on any failure. Also runs in CI via `.github/workflows/validate.yml`.
+
 ## Key Conventions
 
 - Agent prompts should not reference OpenCode-specific tools — use Claude Code tool names (`Read`, `Edit`, `Write`, `Bash`, `Grep`, `Glob`, `Task`, `WebFetch`).
