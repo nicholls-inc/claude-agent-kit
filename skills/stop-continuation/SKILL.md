@@ -8,7 +8,7 @@ description: Global escape hatch to stop all automated continuation mechanisms.
 Set global/session continuation disable flags and deactivate active loop states.
 
 ## Execute
-1. Update `.agent-kit/cc-omo/runtime.local.json`:
+1. Update `.agent-kit/state/runtime.local.json`:
    - `version=1`
    - `sessions.<session_or_global>.stopContinuation.disabled=true`
    - `sessions.<session_or_global>.stopContinuation.disabledReason="manual escape hatch"`

@@ -1,18 +1,6 @@
-# Agent mapping: oh-my-opencode -> Claude Code
+# Agent Mapping
 
-This document maps each agent defined in the original oh-my-opencode roster to its Claude Code plugin equivalent.
-
-## What is 1:1 here?
-
-"1:1" means we preserve:
-- role/purpose
-- tool restrictions
-- output structure
-- cost intent (cheap vs expensive)
-
-but we must adapt:
-- OpenCode-only tools (e.g. `call_omo_agent`, `todowrite`)
-- OpenCode-only lifecycle behaviors (some continuation/coordination hooks)
+This document maps each agent in the plugin to its role, model, and namespace.
 
 ## Inventory
 
@@ -33,33 +21,28 @@ These agents run as forked subagents via `Task()` or `context: fork` skills.
 
 | Agent | Category | Model | Claude Code equivalent |
 |---|---|---|---|
-| Explore | code search | haiku | `claude-agent-kit:omo-explore` |
-| Librarian | external research | sonnet | `claude-agent-kit:omo-librarian` |
-| Oracle | advisor | opus | `claude-agent-kit:omo-oracle` |
-| Metis | pre-planning | opus | `claude-agent-kit:omo-metis` |
-| Momus | plan review | opus | `claude-agent-kit:omo-momus` |
+| Explore | code search | haiku | `claude-agent-kit:explore` |
+| Librarian | external research | sonnet | `claude-agent-kit:librarian` |
+| Oracle | advisor | opus | `claude-agent-kit:oracle` |
+| Metis | pre-planning | opus | `claude-agent-kit:metis` |
+| Momus | plan review | opus | `claude-agent-kit:momus` |
 
 ### Agents not yet ported
-
-These agents from the original roster do not have equivalents in this plugin yet.
 
 | Agent | Category | Original cost | Notes |
 |---|---|---|---|
 | Multimodal-Looker | vision/PDF | cheap | Pending multimodal support |
-| Sisyphus-Junior | focused executor | medium | Merged into sisyphus persona |
-| Boulder | bounded finisher | medium | Replaced by hook-driven continuation |
 
 ## Tool surface translation
 
-| oh-my-opencode reference | Claude Code equivalent |
+| Reference | Claude Code equivalent |
 |---|---|
-| `call_omo_agent(subagent_type="explore"\|"librarian"\|...)` | `Task(<agent-name>)` (only available when running a main-thread agent) or `context: fork` skills |
-| `todowrite` / task/todo enforcement | Claude Code tasks (agent teams) or explicit checklists; optional hooks for gates |
-| OpenCode-specific tools | Replace with Claude Code tools: `Read`, `Edit`, `Write`, `Bash`, `Glob`, `Grep`, plus MCP tools |
+| `Task(<agent-name>)` | Fork a specialist subagent via `context: fork` skills |
+| Task/todo enforcement | Claude Code tasks (agent teams) or explicit checklists; optional hooks for gates |
+| External tools | Replace with Claude Code tools: `Read`, `Edit`, `Write`, `Bash`, `Glob`, `Grep`, plus MCP tools |
 
 ## Prompt suitability notes
 
 Common changes required when porting prompts:
-- Remove references to OpenCode-only tools and replace with Claude Code tool names.
-- Remove OpenCode-specific file editing constraints (e.g., apply_patch semantics) and keep the behavioral intent.
+- Use Claude Code tool names in all agent prompts.
 - Replace background-task manager language with Claude Code subagent behavior (foreground/background limitations).

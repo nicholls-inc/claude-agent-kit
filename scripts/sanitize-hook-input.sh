@@ -17,7 +17,7 @@ set -euo pipefail
 
 readonly _MAX_PROMPT_LENGTH=2000
 readonly _REDACTED="[REDACTED]"
-readonly _HOOK_INPUT_DEBUG_DIR=".agent-kit/evidence/cc-omo-parity/hook-input"
+readonly _HOOK_INPUT_DEBUG_DIR=".agent-kit/evidence/hook-input"
 
 # --- Gather raw JSON input ---
 _RAW_JSON="${SANITIZE_INPUT:-}"
@@ -117,7 +117,7 @@ export HOOK_TOOL_ARGS
 export HOOK_SESSION_ID
 export HOOK_ASSISTANT_TEXT
 
-if [[ "${OMO_DEBUG:-}" == "1" ]]; then
+if [[ "${AGENT_KIT_DEBUG:-}" == "1" ]]; then
   mkdir -p "${_HOOK_INPUT_DEBUG_DIR}" 2>/dev/null || true
   printf '%s\n' "${_SAFE_JSON}" > "${_HOOK_INPUT_DEBUG_DIR}/latest-redacted.json" 2>/dev/null || true
 fi

@@ -1,6 +1,6 @@
-# OMO Plugin State Schema
+# Plugin State Schema
 
-This file defines the canonical state keys used by `omo/scripts/*.sh` and `omo/skills/*`.
+This file defines the canonical state keys used by `scripts/*.sh` and `skills/*`.
 
 ## Versioning
 
@@ -24,7 +24,7 @@ Rules:
 - `active=false` or `status=done` means continuation should not be enforced from boulder.
 - Missing/corrupt boulder must fail open.
 
-## `.agent-kit/cc-omo/runtime.local.json`
+## `.agent-kit/state/runtime.local.json`
 
 ```json
 {

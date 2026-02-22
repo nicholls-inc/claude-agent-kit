@@ -13,8 +13,8 @@ Write a deterministic handoff file for continuation.
    - active plan path
    - current task
    - unresolved errors (if known)
-   - resume command: `/omo:start-work`
-   - escape hatch: `/omo:stop-continuation`
+   - resume command: `/claude-agent-kit:start-work`
+   - escape hatch: `/claude-agent-kit:stop-continuation`
 3. Avoid secrets or raw hook payloads.
 4. Print the handoff path and concise summary.
 

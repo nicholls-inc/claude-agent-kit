@@ -1,28 +1,22 @@
-# OMO Claude Code Plugin
+# Claude Agent Kit
 
-`omo` recreates OMO Tier A workflows in Claude Code using hooks, skills, subagents, and repo-local state files.
+A multi-agent orchestration plugin for Claude Code. Provides persona-based workflows, planning and execution pipelines, specialist subagents, and continuation control using hooks, skills, subagents, and repo-local state files.
 
-## Tier A (implemented)
+## Features
 
-- Ultrawork trigger via `ulw`/`ultrawork` keyword and `/omo:ulw` skill.
-- Plan to execution flow via `/omo:plan` and `/omo:start-work` using `.agent-kit/boulder.json`.
+- Ultrawork trigger via `ulw`/`ultrawork` keyword and `/claude-agent-kit:ulw` skill.
+- Plan to execution flow via `/claude-agent-kit:plan` and `/claude-agent-kit:start-work` using `.agent-kit/boulder.json`.
 - Bounded continuation enforcement in Stop hook with max blocks, cooldown, and escape hatch.
 - Session resume injection from active boulder state on `SessionStart`.
 - Leaf specialists: explore, librarian, oracle, metis, momus.
-- Main-session persona controls: `/omo:sisyphus`, `/omo:hephaestus`, `/omo:prometheus`, `/omo:atlas`.
+- Main-session persona controls: `/claude-agent-kit:sisyphus`, `/claude-agent-kit:hephaestus`, `/claude-agent-kit:prometheus`, `/claude-agent-kit:atlas`.
 
-## Tier B (deferred or partial)
-
-- Additional keyword modes beyond ultrawork (search/analyze).
-- Rich output truncation and notification patterns.
-- Full automated selftest execution inside a live Claude Code plugin runtime (this repo ships the procedure and evidence conventions).
-
-## Tier C (explicit non-parity)
+## Limitations
 
 - Hidden model override is not supported.
 - Native custom tools are not supported; use built-in tools and MCP wrappers.
 - Nested subagent orchestration is not supported.
-- Full tool output rewriting parity is not supported.
+- Full tool output rewriting is not supported.
 
 ## Security and Permissions
 
@@ -31,7 +25,7 @@ Recommended posture (documentation only):
 - ask: Bash, Edit, Write, WebFetch, MCP
 - deny destructive bash patterns: `rm -rf`, `mkfs`, `dd if=`
 
-The plugin does not ship `omo/settings.json` and does not auto-change user permissions.
+The plugin does not ship a `settings.json` and does not auto-change user permissions.
 
 ## Compatibility
 
@@ -42,7 +36,7 @@ The plugin does not ship `omo/settings.json` and does not auto-change user permi
 ## Selftest Pass Criteria
 
 Selftest passes when:
-- evidence logs are written under `.agent-kit/evidence/cc-omo-parity/<area>/...` for each scenario
+- evidence logs are written under `.agent-kit/evidence/<area>/...` for each scenario
 - plugin validation commands report no errors in a real plugin runtime
 - destructive Bash guard scenario is blocked
 
@@ -50,5 +44,5 @@ Selftest passes when:
 
 1. Enable plugin in Claude Code.
 2. Run `/plugin validate` and `/plugin errors`.
-3. Run `/omo:selftest` and collect evidence under `.agent-kit/evidence/cc-omo-parity/final/`.
-4. Confirm escape hatch works with `/omo:stop-continuation`.
+3. Run `/claude-agent-kit:selftest` and collect evidence under `.agent-kit/evidence/final/`.
+4. Confirm escape hatch works with `/claude-agent-kit:stop-continuation`.

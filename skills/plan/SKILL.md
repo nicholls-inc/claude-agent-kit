@@ -21,7 +21,7 @@ Generate a checklist plan and initialize boulder state.
    - `planPath=".agent-kit/plans/<slug>.md"`
    - `currentTask` set to first unchecked task
    - `updatedAt=<now>`
-5. Print: plan path, current task, and reminder to run `/omo:start-work`.
+5. Print: plan path, current task, and reminder to run `/claude-agent-kit:start-work`.
 
 ## Constraints
 - Planning output should be markdown-first.

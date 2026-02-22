@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## What This Is
 
-A Claude Code plugin that ports the oh-my-opencode (OMO) multi-agent roster to Anthropic-only models. Pure-markdown plugin — no build step, no dependencies, no compiled code. All agents, skills, hooks, and docs are plain `.md` or `.json` files.
+A multi-agent orchestration plugin for Claude Code. Provides persona-based workflows, planning and execution pipelines, specialist subagents, and continuation control. Pure-markdown plugin — no build step, no dependencies, no compiled code. All agents, skills, hooks, and docs are plain `.md` or `.json` files.
 
 ## Running Locally
 
@@ -28,7 +28,7 @@ Each file has YAML frontmatter (`name`, `description`, `model`, `tools`, `maxTur
 
 Two categories:
 - **Persona agents** (main-session injection via hooks): `sisyphus` (opus, orchestrator), `hephaestus` (opus, autonomous executor), `atlas` (sonnet, execution coordinator), `prometheus` (opus, planner).
-- **Subagents** (forked specialists): `omo-explore` (haiku, code search), `omo-librarian` (sonnet, external research), `omo-oracle` (opus, architecture advisor), `omo-metis` (opus, pre-planning), `omo-momus` (opus, plan review).
+- **Subagents** (forked specialists): `explore` (haiku, code search), `librarian` (sonnet, external research), `oracle` (opus, architecture advisor), `metis` (opus, pre-planning), `momus` (opus, plan review).
 
 ### Skills (`skills/*/SKILL.md`)
 
@@ -52,8 +52,8 @@ Four hooks, all dispatched through `scripts/hook-router.sh`:
 
 Runtime state files (gitignored, not part of the plugin itself):
 - `boulder.json`: Active plan tracking (`active`, `status`, `planPath`, `currentTask`).
-- `plans/*.md`: Markdown checklists created by `/omo:plan`.
-- `cc-omo/runtime.local.json`: Session state (`activePersona`, ULW flags, stop counters).
+- `plans/*.md`: Markdown checklists created by `/claude-agent-kit:plan`.
+- `state/runtime.local.json`: Session state (`activePersona`, ULW flags, stop counters).
 - `ralph-loop.local.md`: Iteration-bounded continuation loop state.
 
 ### Scripts (`scripts/`)
@@ -66,9 +66,9 @@ Runtime state files (gitignored, not part of the plugin itself):
 ### Model Routing (`docs/routing.md`)
 
 All Anthropic-only:
-- **haiku**: high-volume search/exploration (omo-explore)
-- **sonnet**: implementation, coordination (atlas, omo-librarian)
-- **opus**: architecture, planning, deep review (sisyphus, hephaestus, prometheus, omo-oracle, omo-metis, omo-momus)
+- **haiku**: high-volume search/exploration (explore)
+- **sonnet**: implementation, coordination (atlas, librarian)
+- **opus**: architecture, planning, deep review (sisyphus, hephaestus, prometheus, oracle, metis, momus)
 
 ## Adding a New Agent
 
@@ -85,7 +85,7 @@ All Anthropic-only:
 
 ## Key Conventions
 
-- Agent prompts must use Claude Code tool names (`Read`, `Edit`, `Write`, `Bash`, `Grep`, `Glob`, `Task`, `WebFetch`) — never OpenCode-specific tools.
+- Agent prompts must use Claude Code tool names (`Read`, `Edit`, `Write`, `Bash`, `Grep`, `Glob`, `Task`, `WebFetch`).
 - Read-only agents use `disallowedTools: Edit, Write` and/or `permissionMode: plan`.
 - Project-local settings go in `.claude/settings.local.json`, never global user settings.
 - All shell scripts must have `#!/usr/bin/env bash`, `set -euo pipefail`, and be executable (`chmod +x`).

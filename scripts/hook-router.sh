@@ -14,15 +14,15 @@ set -euo pipefail
 #   - On ANY error: log to stderr, exit 0, print nothing to stdout (fail-open).
 #
 # ENV:
-#   OMO_DEBUG=1  → write diagnostics to .agent-kit/evidence/cc-omo-parity/debug/
+#   AGENT_KIT_DEBUG=1  → write diagnostics to .agent-kit/evidence/debug/
 #                   (never to stdout)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_DIR
 
-readonly DEBUG_DIR=".agent-kit/evidence/cc-omo-parity/debug"
+readonly DEBUG_DIR=".agent-kit/evidence/debug"
 readonly BOULDER_FILE=".agent-kit/boulder.json"
-readonly RUNTIME_FILE=".agent-kit/cc-omo/runtime.local.json"
+readonly RUNTIME_FILE=".agent-kit/state/runtime.local.json"
 readonly RALPH_FILE=".agent-kit/ralph-loop.local.md"
 readonly SESSION_KEY_DEFAULT="global"
 readonly STOP_MAX_BLOCKS=8
@@ -39,7 +39,7 @@ trap '_fail_open ${LINENO}' ERR
 
 # --- Debug helper: writes to debug dir, never stdout ---
 _debug() {
-  if [[ "${OMO_DEBUG:-}" == "1" ]]; then
+  if [[ "${AGENT_KIT_DEBUG:-}" == "1" ]]; then
     mkdir -p "${DEBUG_DIR}"
     local ts
     ts="$(date +%Y%m%dT%H%M%S 2>/dev/null || echo "unknown")"
@@ -248,8 +248,8 @@ _resume_block() {
   if [[ -n "${task_num}" || -n "${task_label}" ]]; then
     printf -- '- Current task: %s %s\n' "${task_num}" "${task_label}"
   fi
-  printf -- '- Continue with /omo:start-work\n'
-  printf -- '- Escape hatch: /omo:stop-continuation\n'
+  printf -- '- Continue with /claude-agent-kit:start-work\n'
+  printf -- '- Escape hatch: /claude-agent-kit:stop-continuation\n'
 }
 
 _active_persona() {
@@ -354,7 +354,7 @@ Execution contract:
 - Continue until requested work is complete.
 - Use parallel exploration for unknown areas.
 - Run verification gates before completion (tests, typecheck, build).
-- Only stop when done or when /omo:stop-continuation is used.
+- Only stop when done or when /claude-agent-kit:stop-continuation is used.
 EOF
   fi
 }
@@ -372,7 +372,7 @@ handle_pre_tool_use() {
 
   if [[ "${tool_name}" == "Bash" ]] || [[ "${tool_name}" == "bash" ]]; then
     if printf '%s' "${cmd}" | grep -Eiq '(^|[[:space:];|&])(rm[[:space:]]+-rf|mkfs([[:space:]]|$)|dd[[:space:]]+if=)'; then
-      _emit_block_json "Blocked destructive Bash pattern by OMO guardrails"
+      _emit_block_json "Blocked destructive Bash pattern by safety guardrails"
       return 0
     fi
   fi
@@ -460,7 +460,7 @@ handle_stop() {
     _increment_ralph_iteration
   fi
 
-  _emit_block_json "Continuation active: finish work or use /omo:stop-continuation"
+  _emit_block_json "Continuation active: finish work or use /claude-agent-kit:stop-continuation"
 }
 
 # --- Dispatch ---

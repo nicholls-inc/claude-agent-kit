@@ -16,7 +16,7 @@ Create loop state and activate Stop-hook continuation for the loop.
    - `goal: |\n  $ARGUMENTS`
    - `done_marker: "RALPH_DONE"`
 2. Confirm the done marker string (`RALPH_DONE`) to use on completion.
-3. Remind user that `/omo:cancel-ralph` and `/omo:stop-continuation` are escape hatches.
+3. Remind user that `/claude-agent-kit:cancel-ralph` and `/claude-agent-kit:stop-continuation` are escape hatches.
 
 ## Constraints
 - Never require manual file editing to stop the loop.

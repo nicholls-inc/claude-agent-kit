@@ -16,13 +16,13 @@ Run the documented parity harness and write evidence files.
 - Ralph Loop Start/Cancel
 - PreToolUse Guard (Destructive Bash)
 - Persona switching checks:
-  - `/omo:sisyphus`
-  - `/omo:hephaestus`
-  - `/omo:prometheus`
-  - `/omo:atlas`
+  - `/claude-agent-kit:sisyphus`
+  - `/claude-agent-kit:hephaestus`
+  - `/claude-agent-kit:prometheus`
+  - `/claude-agent-kit:atlas`
 
 ## Evidence
-- Write logs under `.agent-kit/evidence/cc-omo-parity/<area>/<scenario>.log`.
+- Write logs under `.agent-kit/evidence/<area>/<scenario>.log`.
 - Include command output snippets and pass/fail result per scenario.
 
 ## Constraints
