@@ -1,0 +1,29 @@
+{
+  "trace_id": "atlas-good-001",
+  "description": "Atlas correctly resumed from boulder, advanced tasks, verified before done",
+  "expected_scores": {
+    "atlas.boulder_read": 1,
+    "atlas.task_advancement": 1,
+    "atlas.verification_before_done": 1,
+    "atlas.bounded_continuation": 1,
+    "atlas.single_slice_focus": 1
+  },
+  "metadata": {
+    "persona": "atlas"
+  },
+  "messages": [
+    { "user": "/claude-agent-kit:start-work", "timestamp": "2026-02-22T10:00:00Z" },
+    { "assistant": "Resuming from boulder state. Current task: Task 3 — Add notification endpoints.", "timestamp": "2026-02-22T10:00:05Z" }
+  ],
+  "tool_calls": [
+    { "name": "Read", "input": ".agent-kit/boulder.json", "output": "{\"active\":true,\"status\":\"in_progress\",\"planPath\":\".agent-kit/plans/notification.md\",\"currentTask\":{\"number\":3,\"label\":\"Add notification endpoints\"}}", "timestamp": "2026-02-22T10:00:10Z" },
+    { "name": "Read", "input": ".agent-kit/plans/notification.md", "output": "Plan with tasks 1-6, tasks 1-2 checked", "timestamp": "2026-02-22T10:00:12Z" },
+    { "name": "Read", "input": "src/routes/index.ts", "output": "Current routes", "timestamp": "2026-02-22T10:00:15Z" },
+    { "name": "Edit", "input": "src/routes/notifications.ts", "output": "Added GET /notifications and POST /notifications/read endpoints", "timestamp": "2026-02-22T10:00:25Z" },
+    { "name": "Edit", "input": "src/routes/index.ts", "output": "Registered notification routes", "timestamp": "2026-02-22T10:00:30Z" },
+    { "name": "Bash", "input": "npm test -- --grep notification", "output": "Tests passed: 5/5", "timestamp": "2026-02-22T10:00:40Z" },
+    { "name": "Bash", "input": "npx tsc --noEmit", "output": "No errors", "timestamp": "2026-02-22T10:00:45Z" },
+    { "name": "Edit", "input": ".agent-kit/plans/notification.md - [x] Task 3", "output": "Checked off task 3 - [ ] to - [x]", "timestamp": "2026-02-22T10:00:50Z" },
+    { "name": "Write", "input": ".agent-kit/boulder.json", "output": "{\"active\":true,\"status\":\"in_progress\",\"currentTask\":{\"number\":4,\"label\":\"Implement client connection management\"}}", "timestamp": "2026-02-22T10:00:55Z" }
+  ]
+}

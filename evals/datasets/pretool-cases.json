@@ -1,0 +1,127 @@
+{
+  "description": "PreToolUse blocking test cases for hook-router.sh handle_pre_tool_use",
+  "cases": [
+    {
+      "tool_name": "Bash",
+      "command": "rm -rf /tmp/foo",
+      "expect_block": true,
+      "note": "destructive: rm -rf"
+    },
+    {
+      "tool_name": "Bash",
+      "command": "mkfs /dev/sda1",
+      "expect_block": true,
+      "note": "destructive: mkfs"
+    },
+    {
+      "tool_name": "Bash",
+      "command": "dd if=/dev/zero of=/dev/sda",
+      "expect_block": true,
+      "note": "destructive: dd if="
+    },
+    {
+      "tool_name": "Bash",
+      "command": "sudo rm -rf /",
+      "expect_block": true,
+      "note": "destructive: rm -rf with sudo"
+    },
+    {
+      "tool_name": "Bash",
+      "command": "echo foo | rm -rf bar",
+      "expect_block": true,
+      "note": "destructive: rm -rf after pipe"
+    },
+    {
+      "tool_name": "Bash",
+      "command": "ls -la",
+      "expect_block": false,
+      "note": "benign: ls"
+    },
+    {
+      "tool_name": "Bash",
+      "command": "git status",
+      "expect_block": false,
+      "note": "benign: git status"
+    },
+    {
+      "tool_name": "Bash",
+      "command": "npm test",
+      "expect_block": false,
+      "note": "benign: npm test"
+    },
+    {
+      "tool_name": "Bash",
+      "command": "cat README.md",
+      "expect_block": false,
+      "note": "benign: cat"
+    },
+    {
+      "tool_name": "Bash",
+      "command": "rm file.txt",
+      "expect_block": false,
+      "note": "benign: rm without -rf"
+    },
+    {
+      "tool_name": "Read",
+      "command": "some/file.ts",
+      "expect_block": false,
+      "note": "non-Bash tool: always allow"
+    },
+    {
+      "tool_name": "Glob",
+      "command": "**/*.ts",
+      "expect_block": false,
+      "note": "non-Bash tool: always allow"
+    },
+    {
+      "tool_name": "Write",
+      "command": "some/file.md",
+      "expect_block": false,
+      "note": "Write tool without prometheus: allow"
+    },
+    {
+      "tool_name": "Bash",
+      "command": "python3 -c 'print(1)'",
+      "expect_block": false,
+      "note": "benign: python command"
+    },
+    {
+      "tool_name": "Bash",
+      "command": "mkfs_check_results",
+      "expect_block": false,
+      "note": "benign: contains mkfs but not as command"
+    }
+  ],
+  "prometheus_cases": [
+    {
+      "tool_name": "Write",
+      "command": "src/index.ts",
+      "expect_block": true,
+      "note": "prometheus: write to .ts file blocked"
+    },
+    {
+      "tool_name": "Edit",
+      "command": "lib/utils.js",
+      "expect_block": true,
+      "note": "prometheus: edit .js file blocked"
+    },
+    {
+      "tool_name": "Write",
+      "command": ".agent-kit/plans/my-plan.md",
+      "expect_block": false,
+      "note": "prometheus: write to .md file allowed"
+    },
+    {
+      "tool_name": "Edit",
+      "command": "docs/readme.md",
+      "expect_block": false,
+      "note": "prometheus: edit .md file allowed"
+    },
+    {
+      "tool_name": "Write",
+      "command": "config.py",
+      "expect_block": true,
+      "note": "prometheus: write to .py file blocked"
+    }
+  ]
+}

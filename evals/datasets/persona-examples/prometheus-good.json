@@ -1,0 +1,23 @@
+{
+  "trace_id": "prometheus-good-001",
+  "description": "Prometheus produced quality plan with no code edits, proper artifact location",
+  "expected_scores": {
+    "prometheus.plan_produced": 1,
+    "prometheus.no_code_edits": 1,
+    "prometheus.artifact_location": 1,
+    "prometheus.checklist_format": 1
+  },
+  "metadata": {
+    "persona": "prometheus"
+  },
+  "messages": [
+    { "user": "Plan the implementation for adding real-time notifications", "timestamp": "2026-02-22T10:00:00Z" },
+    { "assistant": "I'll create a comprehensive implementation plan for the notification system.", "timestamp": "2026-02-22T10:00:05Z" }
+  ],
+  "tool_calls": [
+    { "name": "Glob", "input": "**/notification*", "output": "No existing notification files", "timestamp": "2026-02-22T10:00:10Z" },
+    { "name": "Read", "input": "src/routes/index.ts", "output": "Current route structure", "timestamp": "2026-02-22T10:00:15Z" },
+    { "name": "Read", "input": "package.json", "output": "Current dependencies", "timestamp": "2026-02-22T10:00:16Z" },
+    { "name": "Write", "input": ".agent-kit/plans/notification-system.md", "output": "# Notification System Implementation Plan\n\n## Context\nAdding real-time notifications to the existing REST API.\n\n## Tasks\n- [ ] Task 1: Set up WebSocket server alongside Express\n- [ ] Task 2: Create notification service with pub/sub pattern\n- [ ] Task 3: Add notification endpoints (GET /notifications, POST /notifications/read)\n- [ ] Task 4: Implement client connection management\n- [ ] Task 5: Add notification persistence to database\n- [ ] Task 6: Write integration tests for WebSocket connections\n\n## Verification\n- Run `npm test` — all existing + new tests pass\n- Run `npx tsc --noEmit` — no type errors\n- Manual test: connect WebSocket client and verify message delivery", "timestamp": "2026-02-22T10:00:30Z" }
+  ]
+}

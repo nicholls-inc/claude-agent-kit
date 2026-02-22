@@ -17,3 +17,19 @@ jobs:
 
       - name: Run validation tests
         run: ./tests/validate.sh
+
+      - name: Run evaluation suite
+        run: ./evals/run-evals.sh
+
+  prompt-regression:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'pull_request' ||
+      github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run prompt regression detection
+        run: ./evals/prompt-regression.sh

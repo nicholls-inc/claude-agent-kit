@@ -1,0 +1,117 @@
+{
+  "description": "Frozen payloads for SessionStart and Stop handler tests",
+  "session_start": {
+    "personas": [
+      {
+        "persona": "sisyphus",
+        "expect_contains": "Persona: sisyphus",
+        "note": "default persona injection"
+      },
+      {
+        "persona": "hephaestus",
+        "expect_contains": "Persona: hephaestus",
+        "note": "hephaestus persona injection"
+      },
+      {
+        "persona": "atlas",
+        "expect_contains": "Persona: atlas",
+        "note": "atlas persona injection"
+      },
+      {
+        "persona": "prometheus",
+        "expect_contains": "Persona: prometheus",
+        "note": "prometheus persona injection"
+      }
+    ],
+    "boulder_resume": {
+      "boulder_json": {
+        "version": 1,
+        "active": true,
+        "status": "in_progress",
+        "planPath": ".agent-kit/plans/test-plan.md",
+        "currentTask": {
+          "number": 2,
+          "label": "Implement feature X"
+        },
+        "updatedAt": "2026-02-22T16:00:00Z"
+      },
+      "expect_contains_plan_path": ".agent-kit/plans/test-plan.md",
+      "expect_contains_resume": "Resume context",
+      "note": "boulder active with plan path and current task"
+    }
+  },
+  "stop": {
+    "ulw_enabled": {
+      "runtime_json": {
+        "version": 1,
+        "sessions": {
+          "global": {
+            "activePersona": "sisyphus",
+            "ulw": {
+              "enabled": true,
+              "stopBlocks": 0,
+              "lastStopEpoch": 0
+            }
+          }
+        }
+      },
+      "expect_block": true,
+      "note": "ULW enabled should block stop"
+    },
+    "all_disabled": {
+      "runtime_json": {
+        "version": 1,
+        "sessions": {
+          "global": {
+            "activePersona": "sisyphus",
+            "ulw": {
+              "enabled": false,
+              "stopBlocks": 0,
+              "lastStopEpoch": 0
+            }
+          }
+        }
+      },
+      "expect_block": false,
+      "note": "nothing active should allow stop"
+    },
+    "max_blocks_reached": {
+      "runtime_json": {
+        "version": 1,
+        "sessions": {
+          "global": {
+            "activePersona": "sisyphus",
+            "ulw": {
+              "enabled": true,
+              "stopBlocks": 8,
+              "lastStopEpoch": 0
+            }
+          }
+        }
+      },
+      "expect_block": false,
+      "note": "max blocks reached should auto-disable and allow"
+    },
+    "continuation_disabled": {
+      "runtime_json": {
+        "version": 1,
+        "sessions": {
+          "global": {
+            "activePersona": "sisyphus",
+            "ulw": {
+              "enabled": true,
+              "stopBlocks": 3,
+              "lastStopEpoch": 0
+            },
+            "stopContinuation": {
+              "disabled": true,
+              "disabledReason": "user requested"
+            }
+          }
+        }
+      },
+      "expect_block": false,
+      "note": "stop continuation disabled should allow"
+    }
+  }
+}

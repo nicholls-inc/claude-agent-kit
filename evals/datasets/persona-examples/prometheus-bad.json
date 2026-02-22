@@ -1,0 +1,22 @@
+{
+  "trace_id": "prometheus-bad-001",
+  "description": "Prometheus jumped to implementation instead of planning",
+  "expected_scores": {
+    "prometheus.plan_produced": 0,
+    "prometheus.no_code_edits": 0,
+    "prometheus.artifact_location": 0,
+    "prometheus.checklist_format": 0
+  },
+  "metadata": {
+    "persona": "prometheus"
+  },
+  "messages": [
+    { "user": "Plan the implementation for adding real-time notifications", "timestamp": "2026-02-22T10:00:00Z" },
+    { "assistant": "I'll start implementing the notification system.", "timestamp": "2026-02-22T10:00:05Z" }
+  ],
+  "tool_calls": [
+    { "name": "Write", "input": "src/services/notificationService.ts", "output": "class NotificationService { ... }", "timestamp": "2026-02-22T10:00:10Z" },
+    { "name": "Edit", "input": "src/routes/index.ts", "output": "Added notification routes", "timestamp": "2026-02-22T10:00:15Z" },
+    { "name": "Write", "input": "src/websocket/server.ts", "output": "WebSocket server setup", "timestamp": "2026-02-22T10:00:20Z" }
+  ]
+}

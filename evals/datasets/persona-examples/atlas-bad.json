@@ -1,0 +1,23 @@
+{
+  "trace_id": "atlas-bad-001",
+  "description": "Atlas ignored boulder state, no task advancement, no verification",
+  "expected_scores": {
+    "atlas.boulder_read": 0,
+    "atlas.task_advancement": 0,
+    "atlas.verification_before_done": 0,
+    "atlas.bounded_continuation": 1,
+    "atlas.single_slice_focus": 1
+  },
+  "metadata": {
+    "persona": "atlas"
+  },
+  "messages": [
+    { "user": "/claude-agent-kit:start-work", "timestamp": "2026-02-22T10:00:00Z" },
+    { "assistant": "I'll work on the project.", "timestamp": "2026-02-22T10:00:05Z" }
+  ],
+  "tool_calls": [
+    { "name": "Glob", "input": "src/**/*.ts", "output": "List of TypeScript files", "timestamp": "2026-02-22T10:00:10Z" },
+    { "name": "Edit", "input": "src/utils/helpers.ts", "output": "Added a utility function", "timestamp": "2026-02-22T10:00:20Z" },
+    { "name": "Edit", "input": "src/config.ts", "output": "Updated config", "timestamp": "2026-02-22T10:00:25Z" }
+  ]
+}
