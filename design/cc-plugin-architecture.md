@@ -66,11 +66,11 @@ omo/
 OMO parity requires session continuity independent of chat memory.
 
 Repository state (project scope):
-- `.sisyphus/plans/*.md` (plan files; checklist-driven)
-- `.sisyphus/boulder.json` (active plan pointer + progress metadata)
-- `.sisyphus/notepads/<plan>/...` (learnings/decisions/issues/verification)
-- `.sisyphus/ralph-loop.local.md` (loop state; gitignored)
-- `.sisyphus/cc-omo/runtime.local.json` (continuation circuit breakers; gitignored)
+- `.agent-kit/plans/*.md` (plan files; checklist-driven)
+- `.agent-kit/boulder.json` (active plan pointer + progress metadata)
+- `.agent-kit/notepads/<plan>/...` (learnings/decisions/issues/verification)
+- `.agent-kit/ralph-loop.local.md` (loop state; gitignored)
+- `.agent-kit/cc-omo/runtime.local.json` (continuation circuit breakers; gitignored)
 
 In CC, we also optionally use:
 - `.claude/agent-memory/<agent>/` (if we enable subagent memory)

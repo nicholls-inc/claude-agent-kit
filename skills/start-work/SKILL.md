@@ -8,7 +8,7 @@ description: Resume and execute tasks from an active implementation plan.
 Resume from active boulder state and execute tasks in order.
 
 ## Execute
-1. Read `.sisyphus/boulder.json`.
+1. Read `.agent-kit/boulder.json`.
 2. If missing/inactive/done, return deterministic guidance: run `/omo:plan <goal>`.
 3. If active:
    - open `planPath`

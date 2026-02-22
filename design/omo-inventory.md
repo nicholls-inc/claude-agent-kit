@@ -109,25 +109,25 @@ Hook inventory (tiered) is captured in `src/hooks/AGENTS.md`. Key hooks that def
   - Injects mode messages and sets message variant (e.g., `max`) on ultrawork.
 - start-work:
   - Implementation: `src/hooks/start-work/start-work-hook.ts`
-  - Creates/resumes `.sisyphus/boulder.json`, forces agent to Atlas.
+  - Creates/resumes `.agent-kit/boulder.json`, forces agent to Atlas.
 - atlas (continuation hook):
   - Implementation: `src/hooks/atlas/*`
   - Orchestrates boulder sessions and injects continuation prompts on session idle.
 - ralph-loop:
   - Implementation: `src/hooks/ralph-loop/*`
-  - Loop state persisted to `.sisyphus/ralph-loop.local.md`.
+  - Loop state persisted to `.agent-kit/ralph-loop.local.md`.
 
 ### Persistence / State
 
 Primary continuity/state artifacts:
-- Plans: `.sisyphus/plans/*.md` (created by Prometheus, executed by Atlas)
-- Drafts: `.sisyphus/drafts/*.md` (Prometheus working notes)
-- Boulder state: `.sisyphus/boulder.json` (tracks active plan + progress)
+- Plans: `.agent-kit/plans/*.md` (created by Prometheus, executed by Atlas)
+- Drafts: `.agent-kit/drafts/*.md` (Prometheus working notes)
+- Boulder state: `.agent-kit/boulder.json` (tracks active plan + progress)
   - Implementation: `src/features/boulder-state/*`
   - Used by `/start-work` hook: `src/hooks/start-work/start-work-hook.ts`
-- Ralph loop state: `.sisyphus/ralph-loop.local.md` (gitignored)
+- Ralph loop state: `.agent-kit/ralph-loop.local.md` (gitignored)
   - Implementation: `src/hooks/ralph-loop/*`
-- Notepads: `.sisyphus/notepads/<plan-name>/*` (wisdom accumulation)
+- Notepads: `.agent-kit/notepads/<plan-name>/*` (wisdom accumulation)
   - See: `docs/guide/understanding-orchestration-system.md` and `src/hooks/sisyphus-junior-notepad/*`
 
 ## Workflows
@@ -176,7 +176,7 @@ User surface:
   - Behavioral description: `docs/orchestration-guide.md`
 
 Core constraints:
-- Prometheus is planner-only (restricted writes). A dedicated hook enforces markdown-only / .sisyphus-only behavior.
+- Prometheus is planner-only (restricted writes). A dedicated hook enforces markdown-only / .agent-kit-only behavior.
   - Hook: `src/hooks/prometheus-md-only/*`
   - Ultrawork planner message: `src/hooks/keyword-detector/ultrawork/planner.ts`
 
@@ -188,7 +188,7 @@ Ultrawork modifier:
 
 User surface:
 - `/start-work` triggers switching to Atlas and starting/resuming execution.
-- The hook decides whether to resume from `.sisyphus/boulder.json` or create new state from the newest incomplete plan.
+- The hook decides whether to resume from `.agent-kit/boulder.json` or create new state from the newest incomplete plan.
   - Hook: `src/hooks/start-work/start-work-hook.ts`
   - State: `src/features/boulder-state/*`
 
@@ -211,7 +211,7 @@ Agent inventory is summarized in `src/agents/AGENTS.md` (models, modes, restrict
 | Sisyphus | Default orchestrator | Intent gate -> explore -> delegate -> verify | Dynamic sections assembled by `src/agents/dynamic-agent-prompt-builder.ts` and used by `src/agents/sisyphus.ts` | Yes (heavy `task` usage) | Full toolset; denies `call_omo_agent` (see `src/agents/sisyphus.ts`) |
 | Hephaestus | Deep autonomous executor | EXPLORE -> PLAN -> EXECUTE -> VERIFY; completion guarantee | Dynamic sections via `src/agents/dynamic-agent-prompt-builder.ts` in `src/agents/hephaestus.ts` | Yes (heavy explore/librarian, plus category routing) | Full toolset (model requirement: GPT codex) |
 | Prometheus | Planner/interviewer | Interview mode -> draft -> plan generation; consult Metis/Momus | Dedicated planner prompt modules in `src/agents/prometheus/*` | Delegates to Explore/Librarian for research | Write/Edit restricted by hook `src/hooks/prometheus-md-only/*` |
-| Atlas | Plan executor / conductor | Executes `.sisyphus/plans/*` via `/start-work`; resume via boulder | Atlas prompt sections in `src/agents/atlas/*` and orchestration enforced by `src/hooks/atlas/*` | Delegation is primarily enforced via orchestration hooks and task tooling | Denies `task` + `call_omo_agent` (see `src/agents/AGENTS.md`) |
+| Atlas | Plan executor / conductor | Executes `.agent-kit/plans/*` via `/start-work`; resume via boulder | Atlas prompt sections in `src/agents/atlas/*` and orchestration enforced by `src/hooks/atlas/*` | Delegation is primarily enforced via orchestration hooks and task tooling | Denies `task` + `call_omo_agent` (see `src/agents/AGENTS.md`) |
 | Oracle | Read-only architectural advisor | Consultation only, returns guidance | Static agent definition in `src/agents/oracle.ts` | No (read-only) | Denies write/edit/task/call_omo_agent |
 | Librarian | External docs/OSS researcher | Evidence-based research, citations | Static agent definition in `src/agents/librarian.ts` | No (read-only) | Denies write/edit/task/call_omo_agent |
 | Explore | Codebase search/grep | Fast internal repo discovery | Static agent definition in `src/agents/explore.ts` | No (read-only) | Denies write/edit/task/call_omo_agent |
@@ -233,7 +233,7 @@ Integration points:
 
 Workflow associations (high-level):
 - Sisyphus/Hephaestus: heavy use of `task`, `grep`, `glob`, `lsp_diagnostics`, and (optionally) background task tools.
-- Prometheus: uses exploration subagents and is constrained to writing `.sisyphus/**/*.md`.
+- Prometheus: uses exploration subagents and is constrained to writing `.agent-kit/**/*.md`.
 - Atlas execution: mediated by `/start-work` and boulder state; delegates work via task system and continuation hooks.
 
 ## Hooks
@@ -255,10 +255,10 @@ Portability note (for CC mapping):
 ## Persistence
 
 List all artifacts used for continuity:
-- `.sisyphus/drafts/`
-- `.sisyphus/plans/`
-- `.sisyphus/boulder.json`
-- `.sisyphus/notepads/`
+- `.agent-kit/drafts/`
+- `.agent-kit/plans/`
+- `.agent-kit/boulder.json`
+- `.agent-kit/notepads/`
 - task storage (if enabled)
 
 

@@ -73,7 +73,7 @@ Recreate OMO’s user-facing workflows and automation (agents, hooks, skills/com
 - **MCP tool availability**: `/mcp` shows plugin MCP servers; MCP tools callable in foreground session.
 - **Golden-path workflows**: run scripted scenarios (Bash scripts invoked by hooks or a “selftest” skill) that execute each workflow end-to-end and record evidence logs.
 
-Evidence convention: `.sisyphus/evidence/cc-omo-parity/<area>/<scenario>.{log,md,json,png}`
+Evidence convention: `.agent-kit/evidence/cc-omo-parity/<area>/<scenario>.{log,md,json,png}`
 
 ---
 
@@ -114,7 +114,7 @@ Wave 5 (Implementation plan + verification harness design)
       1. `test -f design/parity-contract.md`
       2. `rg -n "Tier A|Tier B|Tier C" design/parity-contract.md`
     Expected Result: file exists; all 3 tiers are present
-    Evidence: `.sisyphus/evidence/cc-omo-parity/contract/tiers.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/contract/tiers.log`
 
   **Recommended Agent Profile**:
   - Category: `writing` (requires careful, unambiguous spec writing)
@@ -156,7 +156,7 @@ Wave 5 (Implementation plan + verification harness design)
       2. `rg -n "cannot use MCP" design/claude-code-capabilities.md`
       3. `rg -n "cannot spawn" design/claude-code-capabilities.md`
     Expected Result: both constraints are present as explicit statements
-    Evidence: `.sisyphus/evidence/cc-omo-parity/cc-docs/key-constraints.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/cc-docs/key-constraints.log`
 
   **Recommended Agent Profile**:
   - Category: `writing` (docs synthesis + constraint capture)
@@ -195,7 +195,7 @@ Wave 5 (Implementation plan + verification harness design)
       1. `test -f design/omo-inventory.md`
       2. `rg -n "^## (Features|Workflows|Agents|Tools|Hooks|Persistence)" design/omo-inventory.md`
     Expected Result: all expected headings appear
-    Evidence: `.sisyphus/evidence/cc-omo-parity/omo/inventory-skeleton.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/omo/inventory-skeleton.log`
 
   **Recommended Agent Profile**:
   - Category: `writing`
@@ -231,7 +231,7 @@ Wave 5 (Implementation plan + verification harness design)
       1. `test -f design/omo-to-cc-mapping.md`
       2. `rg -n "Hard gaps" design/omo-to-cc-mapping.md`
     Expected Result: template file exists and includes Hard gaps
-    Evidence: `.sisyphus/evidence/cc-omo-parity/mapping/template.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/mapping/template.log`
 
   **Recommended Agent Profile**:
   - Category: `writing`
@@ -263,7 +263,7 @@ Wave 5 (Implementation plan + verification harness design)
       1. `rg -n "## Features" -n design/omo-inventory.md`
       2. `rg -n "Agents|Skills|Commands|Hooks|Tools" design/omo-inventory.md`
     Expected Result: all categories appear as subsections under Features
-    Evidence: `.sisyphus/evidence/cc-omo-parity/omo/features-inventory.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/omo/features-inventory.log`
 
   **Recommended Agent Profile**:
   - Category: `writing` (structured inventory writing)
@@ -299,9 +299,9 @@ Wave 5 (Implementation plan + verification harness design)
     Tool: Bash
     Steps:
       1. `rg -n "Ultrawork|start-work|Ralph" design/omo-inventory.md`
-      2. `rg -n "boulder\.json|\.sisyphus/plans" design/omo-inventory.md`
+      2. `rg -n "boulder\.json|\.agent-kit/plans" design/omo-inventory.md`
     Expected Result: workflow names and persistence artifacts are referenced
-    Evidence: `.sisyphus/evidence/cc-omo-parity/omo/workflows.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/omo/workflows.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high` (cross-cutting reasoning + precise extraction)
@@ -337,7 +337,7 @@ Wave 5 (Implementation plan + verification harness design)
     Steps:
       1. `rg -n "Sisyphus|Hephaestus|Prometheus|Atlas|Oracle|Librarian|Explore|Metis|Momus" design/omo-inventory.md`
     Expected Result: all required agent names appear
-    Evidence: `.sisyphus/evidence/cc-omo-parity/omo/agents.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/omo/agents.log`
 
   **Recommended Agent Profile**:
   - Category: `writing` (table synthesis)
@@ -367,7 +367,7 @@ Wave 5 (Implementation plan + verification harness design)
     Steps:
       1. `rg -n "task\b|call_omo_agent|background_output|lsp_|ast_grep|glob\b|grep\b" design/omo-inventory.md`
     Expected Result: major tool families are present
-    Evidence: `.sisyphus/evidence/cc-omo-parity/omo/tools.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/omo/tools.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high` (requires accurate technical classification)
@@ -402,7 +402,7 @@ Wave 5 (Implementation plan + verification harness design)
     Steps:
       1. `rg -n "keyword-detector|start-work|ralph-loop|rules-injector" design/omo-inventory.md`
     Expected Result: the critical hooks are explicitly described
-    Evidence: `.sisyphus/evidence/cc-omo-parity/omo/hooks-critical.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/omo/hooks-critical.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high` (hook/event reasoning + portability tagging)
@@ -416,16 +416,16 @@ Wave 5 (Implementation plan + verification harness design)
 
   **What to do**:
   - In `design/omo-inventory.md` “Persistence” section, document all state artifacts:
-    - `.sisyphus/plans/*.md`, `.sisyphus/drafts/*.md`
-    - `.sisyphus/boulder.json`
-    - `.sisyphus/notepads/<plan>/...`
+    - `.agent-kit/plans/*.md`, `.agent-kit/drafts/*.md`
+    - `.agent-kit/boulder.json`
+    - `.agent-kit/notepads/<plan>/...`
     - tasks storage if used
   - Explain how these artifacts drive continuity.
 
   **References**:
   - `docs/orchestration-guide.md` (boulder flow)
   - `docs/task-system.md`
-  - Search repo for `.sisyphus/` references
+  - Search repo for `.agent-kit/` references
 
   **Acceptance Criteria**:
   - [ ] Persistence section lists the file paths and the workflow that reads/writes each
@@ -436,7 +436,7 @@ Wave 5 (Implementation plan + verification harness design)
     Steps:
       1. `rg -n "boulder\.json|notepads|drafts|plans" design/omo-inventory.md`
     Expected Result: all continuity artifacts appear in the Persistence section
-    Evidence: `.sisyphus/evidence/cc-omo-parity/omo/persistence.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/omo/persistence.log`
 
   **Recommended Agent Profile**:
   - Category: `writing` (state artifact documentation)
@@ -468,7 +468,7 @@ Wave 5 (Implementation plan + verification harness design)
     Steps:
       1. `rg -n "Hook Feasibility Grid" design/omo-to-cc-mapping.md`
     Expected Result: section exists
-    Evidence: `.sisyphus/evidence/cc-omo-parity/mapping/hook-grid.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/mapping/hook-grid.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high` (tradeoff analysis + feasibility)
@@ -502,7 +502,7 @@ Wave 5 (Implementation plan + verification harness design)
     Steps:
       1. `rg -n "visual-engineering|ultrabrain|quick" design/omo-to-cc-mapping.md`
     Expected Result: those category concepts appear with CC equivalents
-    Evidence: `.sisyphus/evidence/cc-omo-parity/mapping/categories.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/mapping/categories.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high`
@@ -536,7 +536,7 @@ Wave 5 (Implementation plan + verification harness design)
       2. `rg -n "Agents:|Skills:|Commands:|Hooks:" docs/features.md`
       3. `rg -n "Agents|Skills|Commands|Hooks" design/omo-to-cc-mapping.md`
     Expected Result: mapping doc clearly mirrors the OMO feature areas
-    Evidence: `.sisyphus/evidence/cc-omo-parity/mapping/exhaustive.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/mapping/exhaustive.log`
 
   **Recommended Agent Profile**:
   - Category: `writing` (careful tabular mapping)
@@ -572,7 +572,7 @@ Wave 5 (Implementation plan + verification harness design)
       1. `test -f design/cc-plugin-architecture.md`
       2. `rg -n "hook router|state|persistence|namespac" design/cc-plugin-architecture.md`
     Expected Result: routing/state/namespacing decisions are present
-    Evidence: `.sisyphus/evidence/cc-omo-parity/design/architecture.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/design/architecture.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high` (architecture synthesis)
@@ -606,7 +606,7 @@ Wave 5 (Implementation plan + verification harness design)
       1. `test -f design/workflows/ultrawork.md`
       2. `rg -n "Trigger|Steps|State|Stop" design/workflows/ultrawork.md`
     Expected Result: all 4 elements exist
-    Evidence: `.sisyphus/evidence/cc-omo-parity/design/ultrawork.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/design/ultrawork.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high`
@@ -641,7 +641,7 @@ Wave 5 (Implementation plan + verification harness design)
       1. `test -f design/workflows/plan-and-start-work.md`
       2. `rg -n "init|resume|boulder" design/workflows/plan-and-start-work.md`
     Expected Result: init/resume are described with state
-    Evidence: `.sisyphus/evidence/cc-omo-parity/design/plan-start-work.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/design/plan-start-work.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high`
@@ -676,7 +676,7 @@ Wave 5 (Implementation plan + verification harness design)
       1. `test -f design/workflows/ralph-loop.md`
       2. `rg -n "max iterations|cancel|escape" design/workflows/ralph-loop.md`
     Expected Result: safety/escape hatch documented
-    Evidence: `.sisyphus/evidence/cc-omo-parity/design/ralph-loop.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/design/ralph-loop.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high`
@@ -711,7 +711,7 @@ Wave 5 (Implementation plan + verification harness design)
       1. `test -f design/security-and-permissions.md`
       2. `rg -n "deny|sandbox|prompt injection" design/security-and-permissions.md`
     Expected Result: core security topics present
-    Evidence: `.sisyphus/evidence/cc-omo-parity/design/security.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/design/security.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high` (security policy + safe defaults)
@@ -749,7 +749,7 @@ txt=open('design/selftest.md','r',encoding='utf-8').read()
 print(len(re.findall(r'^Scenario:', txt, flags=re.M)))
 PY`
     Expected Result: count >= 6
-    Evidence: `.sisyphus/evidence/cc-omo-parity/design/selftest-scenarios.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/design/selftest-scenarios.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high` (requires operational CLI detail)
@@ -786,7 +786,7 @@ PY`
       1. `test -f design/plugin-spec.md`
       2. `rg -n "plugin\.json|hooks\.json|agents/|skills/" design/plugin-spec.md`
     Expected Result: all key components referenced
-    Evidence: `.sisyphus/evidence/cc-omo-parity/design/plugin-spec.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/design/plugin-spec.log`
 
   **Recommended Agent Profile**:
   - Category: `writing` (spec enumeration)
@@ -831,7 +831,7 @@ print('has_section', len(sec)>1)
 print('tier_c', len(re.findall(r'Tier C', txt)))
 PY`
     Expected Result: section exists; Tier C appears at least once
-    Evidence: `.sisyphus/evidence/cc-omo-parity/mapping/hard-gaps.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/mapping/hard-gaps.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high` (technical feasibility + explicit gaps)
@@ -869,7 +869,7 @@ txt=open('design/opencode-dependency-audit.md','r',encoding='utf-8').read()
 print('rows', len(re.findall(r'^\|', txt, flags=re.M)))
 PY`
     Expected Result: table present (row count > 20 including header/separator)
-    Evidence: `.sisyphus/evidence/cc-omo-parity/omo/opencode-audit.log`
+    Evidence: `.agent-kit/evidence/cc-omo-parity/omo/opencode-audit.log`
 
   **Recommended Agent Profile**:
   - Category: `unspecified-high` (dependency analysis)

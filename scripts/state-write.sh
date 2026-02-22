@@ -11,8 +11,8 @@ set -euo pipefail
 #   - Never print errors to stdout — errors go to stderr only.
 #
 # USAGE:
-#   ./state-write.sh .sisyphus/boulder.json '{"task": 1}'
-#   echo '{"task": 1}' | ./state-write.sh .sisyphus/boulder.json
+#   ./state-write.sh .agent-kit/boulder.json '{"task": 1}'
+#   echo '{"task": 1}' | ./state-write.sh .agent-kit/boulder.json
 
 STATE_FILE="${1:-}"
 

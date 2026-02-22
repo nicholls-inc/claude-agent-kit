@@ -36,7 +36,7 @@ Each has YAML frontmatter (`name`, `description`) and a prompt template. Namespa
 
 Categories:
 - **Persona switches** (`sisyphus`, `hephaestus`, `atlas`, `prometheus`): Set `activePersona` in runtime state.
-- **Workflow** (`plan`, `start-work`): Create plans under `.sisyphus/plans/` and execute from boulder state.
+- **Workflow** (`plan`, `start-work`): Create plans under `.agent-kit/plans/` and execute from boulder state.
 - **Continuation control** (`ulw`, `ralph-loop`, `stop-continuation`, `cancel-ralph`): Manage autonomous execution loops.
 - **Utilities** (`handoff`, `selftest`): Context transfer and self-testing.
 
@@ -48,7 +48,7 @@ Four hooks, all dispatched through `scripts/hook-router.sh`:
 - **PreToolUse**: Blocks destructive Bash commands; blocks code edits in `prometheus` persona.
 - **Stop**: Blocks agent stop when boulder/ralph/ULW continuation is active (up to 8 blocks, then auto-disables).
 
-### State Management (`.sisyphus/`)
+### State Management (`.agent-kit/`)
 
 Runtime state files (gitignored, not part of the plugin itself):
 - `boulder.json`: Active plan tracking (`active`, `status`, `planPath`, `currentTask`).

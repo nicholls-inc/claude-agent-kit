@@ -10,7 +10,7 @@ Hard guardrail:
 ## Evidence Convention
 
 Write evidence under:
-- `.sisyphus/evidence/cc-omo-parity/<area>/<scenario>.log`
+- `.agent-kit/evidence/cc-omo-parity/<area>/<scenario>.log`
 
 ## Scenario: Plugin Loads
 
@@ -51,8 +51,8 @@ Scenario: Plan Creation
 
 Steps:
 1. Run `/omo:plan "Create a tiny plan"`.
-2. Verify `.sisyphus/plans/` contains a new file.
-3. Verify `.sisyphus/boulder.json` exists and points to it.
+2. Verify `.agent-kit/plans/` contains a new file.
+3. Verify `.agent-kit/boulder.json` exists and points to it.
 
 Expected:
 - plan + boulder created.
@@ -62,7 +62,7 @@ Expected:
 Scenario: Start Work Resume
 
 Steps:
-1. With an active `.sisyphus/boulder.json`, run `/omo:start-work`.
+1. With an active `.agent-kit/boulder.json`, run `/omo:start-work`.
 2. Confirm it reads boulder and begins at `currentTask`.
 
 Expected:
@@ -74,7 +74,7 @@ Scenario: Ralph Loop Start/Cancel
 
 Steps:
 1. Run `/omo:ralph-loop "Do a trivial non-destructive task"`.
-2. Confirm `.sisyphus/ralph-loop.local.md` exists.
+2. Confirm `.agent-kit/ralph-loop.local.md` exists.
 3. Run `/omo:cancel-ralph`.
 
 Expected:

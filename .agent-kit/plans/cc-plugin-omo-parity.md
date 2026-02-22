@@ -11,7 +11,7 @@
   - Main-session personas: `sisyphus`, `hephaestus`, `prometheus`, `atlas`
   - Leaf workers: `omo-explore`, `omo-librarian`, `omo-oracle`, `omo-metis`, `omo-momus`
 - Non-fork skills to switch the main session persona: `/omo:sisyphus`, `/omo:hephaestus`, `/omo:prometheus`, `/omo:atlas`
-- Repo state files: `.sisyphus/boulder.json`, `.sisyphus/plans/*.md`, `.sisyphus/cc-omo/runtime.local.json` (gitignored), `.sisyphus/ralph-loop.local.md` (gitignored), `.sisyphus/evidence/cc-omo-parity/**`
+- Repo state files: `.agent-kit/boulder.json`, `.agent-kit/plans/*.md`, `.agent-kit/cc-omo/runtime.local.json` (gitignored), `.agent-kit/ralph-loop.local.md` (gitignored), `.agent-kit/evidence/cc-omo-parity/**`
 - Explicit Tier C gap doc section (no hidden model override, no native custom tools, no nested orchestration, limited tool output transforms)
 
 **Estimated Effort**: Large
@@ -79,7 +79,7 @@ Implement a CC plugin (`omo/`) that achieves Tier A parity behaviors as defined 
 
 ### Agent-Executable QA Policy (for CC plugin)
 Every task includes QA scenarios the executor can run in Claude Code CLI (and/or shell) with evidence written under:
-- `.sisyphus/evidence/cc-omo-parity/<area>/<scenario>.log`
+- `.agent-kit/evidence/cc-omo-parity/<area>/<scenario>.log`
 
 Notes:
 - If the QA scenario uses `rg`, prefer Claude Code's built-in `Grep` tool when `rg` is not available on the host.
@@ -144,13 +144,13 @@ Wave 4 (Selftest + docs + hardening)
       1. test -f omo/.claude-plugin/plugin.json
       2. test -f omo/hooks/hooks.json
       3. test -d omo/scripts && test -d omo/agents && test -d omo/skills
-    Evidence: .sisyphus/evidence/cc-omo-parity/scaffold/plugin-skeleton.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/scaffold/plugin-skeleton.log
 
   Scenario: No src/ changes required
     Tool: Bash
     Steps:
       1. git diff --name-only | (grep -v '^src/' || true)
-    Evidence: .sisyphus/evidence/cc-omo-parity/scaffold/no-src-changes.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/scaffold/no-src-changes.log
   ```
 
  [x] 2. Define leaf subagents (`omo/agents/omo-*.md`)
@@ -193,13 +193,13 @@ Wave 4 (Selftest + docs + hardening)
       3. test -f omo/agents/omo-oracle.md
       4. test -f omo/agents/omo-metis.md
       5. test -f omo/agents/omo-momus.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/agents/agent-files.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/agents/agent-files.log
 
   Scenario: Leaf-only constraints mentioned
     Tool: Bash
     Steps:
       1. rg -n "cannot spawn" omo/agents/omo-*.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/agents/leaf-only.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/agents/leaf-only.log
   ```
 
  [x] 3. Define Tier A skills (`omo/skills/*/SKILL.md`)
@@ -245,13 +245,13 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. for s in ulw plan start-work ralph-loop cancel-ralph stop-continuation handoff selftest; do test -f "omo/skills/$s/SKILL.md"; done
-    Evidence: .sisyphus/evidence/cc-omo-parity/skills/skill-files.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/skills/skill-files.log
 
   Scenario: Skills reference $ARGUMENTS
     Tool: Bash
     Steps:
       1. rg -n "\$ARGUMENTS" omo/skills -S
-    Evidence: .sisyphus/evidence/cc-omo-parity/skills/skill-arguments.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/skills/skill-arguments.log
   ```
 
  [x] 4. Wire CC hook events to a single router (`omo/hooks/hooks.json`)
@@ -286,13 +286,13 @@ Wave 4 (Selftest + docs + hardening)
     Steps:
       1. rg -n "hook-router\.sh" omo/hooks/hooks.json
       2. rg -n "SessionStart|UserPromptSubmit|PreToolUse|Stop" omo/hooks/hooks.json
-    Evidence: .sisyphus/evidence/cc-omo-parity/hooks/hooks-json.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/hooks/hooks-json.log
 
   Scenario: Plugin-root path used
     Tool: Bash
     Steps:
       1. rg -n "\$\{CLAUDE_PLUGIN_ROOT\}" omo/hooks/hooks.json
-    Evidence: .sisyphus/evidence/cc-omo-parity/hooks/plugin-root-path.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/hooks/plugin-root-path.log
   ```
 
  [x] 5. Add hardened script scaffolding (`omo/scripts/*.sh`)
@@ -300,7 +300,7 @@ Wave 4 (Selftest + docs + hardening)
   **What to do**:
   - Create script files with shebang, `set -euo pipefail`, and a consistent stdout/stderr policy.
   - Scripts (initial): `hook-router.sh`, `detect-ulw.sh`, `sanitize-hook-input.sh`, `state-read.sh`, `state-write.sh`.
-  - Add a `DEBUG` toggle that writes diagnostic info to files under `.sisyphus/evidence/cc-omo-parity/` (never to stdout).
+  - Add a `DEBUG` toggle that writes diagnostic info to files under `.agent-kit/evidence/cc-omo-parity/` (never to stdout).
 
   **Must NOT do**:
   - Never print debug logs to stdout in decision hooks.
@@ -333,25 +333,25 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. for f in omo/scripts/*.sh; do test -f "$f"; bash -n "$f"; done
-    Evidence: .sisyphus/evidence/cc-omo-parity/scripts/bash-n.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/scripts/bash-n.log
 
   Scenario: Stdout/stderr policy present
     Tool: Bash
     Steps:
       1. rg -n "set -euo pipefail" omo/scripts/*.sh
-    Evidence: .sisyphus/evidence/cc-omo-parity/scripts/hardening-flags.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/scripts/hardening-flags.log
   ```
 
  [x] 6. Initialize repo state + ignore rules for local artifacts
 
   **What to do**:
-  - Ensure `.sisyphus/` subdirs exist (plans/evidence/cc-omo) and add ignore rules for local state:
-    - `.sisyphus/cc-omo/runtime.local.json`
-    - `.sisyphus/ralph-loop.local.md`
+  - Ensure `.agent-kit/` subdirs exist (plans/evidence/cc-omo) and add ignore rules for local state:
+    - `.agent-kit/cc-omo/runtime.local.json`
+    - `.agent-kit/ralph-loop.local.md`
   - Decide whether evidence logs are committed or ignored; default: ignore evidence logs (keep local).
 
   **Must NOT do**:
-  - Do not overwrite existing `.sisyphus/` conventions already used by this repo.
+  - Do not overwrite existing `.agent-kit/` conventions already used by this repo.
 
   **Recommended Agent Profile**:
   - **Category**: `quick`
@@ -365,35 +365,35 @@ Wave 4 (Selftest + docs + hardening)
   **References**:
   - `design/cc-plugin-architecture.md` - state-of-truth file list
   - `design/selftest.md` - evidence path conventions
-  - Existing repo patterns: `.sisyphus/plans/`, `.sisyphus/drafts/`
+  - Existing repo patterns: `.agent-kit/plans/`, `.agent-kit/drafts/`
 
   **Acceptance Criteria**:
-  - [ ] Ignore rules exist for `.sisyphus/cc-omo/runtime.local.json` and `.sisyphus/ralph-loop.local.md`
-  - [ ] `.sisyphus/evidence/cc-omo-parity/` exists
+  - [ ] Ignore rules exist for `.agent-kit/cc-omo/runtime.local.json` and `.agent-kit/ralph-loop.local.md`
+  - [ ] `.agent-kit/evidence/cc-omo-parity/` exists
 
   **QA Scenarios**:
   ```
   Scenario: Ignore rules present
     Tool: Bash
     Steps:
-      1. rg -n "cc-omo/runtime\.local\.json" .gitignore .sisyphus/.gitignore || true
-      2. rg -n "ralph-loop\.local\.md" .gitignore .sisyphus/.gitignore || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/state/ignore-rules.log
+      1. rg -n "cc-omo/runtime\.local\.json" .gitignore .agent-kit/.gitignore || true
+      2. rg -n "ralph-loop\.local\.md" .gitignore .agent-kit/.gitignore || true
+    Evidence: .agent-kit/evidence/cc-omo-parity/state/ignore-rules.log
 
   Scenario: Evidence directory exists
     Tool: Bash
     Steps:
-      1. test -d .sisyphus/evidence/cc-omo-parity
-    Evidence: .sisyphus/evidence/cc-omo-parity/state/evidence-dir.log
+      1. test -d .agent-kit/evidence/cc-omo-parity
+    Evidence: .agent-kit/evidence/cc-omo-parity/state/evidence-dir.log
   ```
 
 - [x] 7. Implement robust state read/write helpers (atomic + fail-open)
 
   **What to do**:
   - Implement `state-read.sh` and `state-write.sh` to manage:
-    - `.sisyphus/boulder.json`
-    - `.sisyphus/cc-omo/runtime.local.json`
-    - `.sisyphus/ralph-loop.local.md`
+    - `.agent-kit/boulder.json`
+    - `.agent-kit/cc-omo/runtime.local.json`
+    - `.agent-kit/ralph-loop.local.md`
   - Use atomic write (`tmp` + `mv`) and best-effort locking (lockfile) to reduce hook races.
   - If parsing fails (corrupt JSON/YAML), treat as missing and allow Stop (fail-open).
 
@@ -424,14 +424,14 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "mv .*\.tmp" omo/scripts/state-write.sh
-    Evidence: .sisyphus/evidence/cc-omo-parity/state/atomic-write.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/state/atomic-write.log
 
   Scenario: Fail-open on corrupt state
     Tool: Bash
     Steps:
-      1. printf '{not-json' > .sisyphus/cc-omo/runtime.local.json
-      2. bash omo/scripts/state-read.sh .sisyphus/cc-omo/runtime.local.json || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/state/fail-open.log
+      1. printf '{not-json' > .agent-kit/cc-omo/runtime.local.json
+      2. bash omo/scripts/state-read.sh .agent-kit/cc-omo/runtime.local.json || true
+    Evidence: .agent-kit/evidence/cc-omo-parity/state/fail-open.log
   ```
 
 - [x] 8. Sanitize hook stdin JSON before use
@@ -439,7 +439,7 @@ Wave 4 (Selftest + docs + hardening)
   **What to do**:
   - Implement `sanitize-hook-input.sh` to parse stdin, allowlist only needed fields, and drop any large/untrusted payloads.
   - Add a safe mechanism to extract required fields (tool name, command, arguments, event type) without shell interpolation.
-  - Add a "hook input probe" mode (DEBUG only) that writes a redacted snapshot to `.sisyphus/evidence/cc-omo-parity/hook-input/`.
+  - Add a "hook input probe" mode (DEBUG only) that writes a redacted snapshot to `.agent-kit/evidence/cc-omo-parity/hook-input/`.
 
   **Must NOT do**:
   - Never store raw hook input containing secrets.
@@ -468,13 +468,13 @@ Wave 4 (Selftest + docs + hardening)
     Steps:
       1. rg -n "jq -e" omo/scripts/sanitize-hook-input.sh || true
       2. rg -n "node -e" omo/scripts/sanitize-hook-input.sh || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/security/sanitizer-impl.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/security/sanitizer-impl.log
 
   Scenario: Debug snapshots write to evidence (not stdout)
     Tool: Bash
     Steps:
       1. rg -n "cc-omo-parity/hook-input" omo/scripts/sanitize-hook-input.sh
-    Evidence: .sisyphus/evidence/cc-omo-parity/security/hook-probe-path.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/security/hook-probe-path.log
   ```
 
 - [x] 9. Implement hook router dispatch (event → handler)
@@ -517,13 +517,13 @@ Wave 4 (Selftest + docs + hardening)
     Steps:
       1. printf '{bad' | bash omo/scripts/hook-router.sh >/tmp/router.out 2>/tmp/router.err || true
       2. test -s /tmp/router.err
-    Evidence: .sisyphus/evidence/cc-omo-parity/router/fail-open.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/router/fail-open.log
 
   Scenario: Router JSON-only in decision mode
     Tool: Bash
     Steps:
       1. printf '{}' | bash omo/scripts/hook-router.sh | (node -e 'JSON.parse(require("fs").readFileSync(0,"utf8"))') || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/router/json-only.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/router/json-only.log
   ```
 
 - [x] 10. Implement `UserPromptSubmit` ultrawork keyword injection
@@ -562,19 +562,19 @@ Wave 4 (Selftest + docs + hardening)
     Steps:
       1. echo "bulwark" | bash omo/scripts/detect-ulw.sh && exit 1 || true
       2. echo "ulw do thing" | bash omo/scripts/detect-ulw.sh
-    Evidence: .sisyphus/evidence/cc-omo-parity/ulw/word-boundary.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/ulw/word-boundary.log
 
   Scenario: Injection block contains verification gates
     Tool: Bash
     Steps:
       1. rg -n "verification" omo/scripts/hook-router.sh omo/skills/ulw/SKILL.md || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/ulw/verification-gates-text.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/ulw/verification-gates-text.log
   ```
 
 - [x] 11. Implement `SessionStart` resume context injection
 
   **What to do**:
-  - On `SessionStart`, if `.sisyphus/boulder.json` indicates active work:
+  - On `SessionStart`, if `.agent-kit/boulder.json` indicates active work:
     - inject a small resume block (plan path + current task + escape hatch reminder)
     - do NOT inject the entire plan file (avoid context blowups)
   - If state is missing/corrupt: print nothing (fail-open).
@@ -605,13 +605,13 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "/omo:stop-continuation" omo/scripts/hook-router.sh
-    Evidence: .sisyphus/evidence/cc-omo-parity/resume/escape-hatch-mention.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/resume/escape-hatch-mention.log
 
   Scenario: Resume block size is capped
     Tool: Bash
     Steps:
       1. rg -n "max.*lines|cap" omo/scripts/hook-router.sh || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/resume/cap.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/resume/cap.log
   ```
 
 - [x] 12. Implement `PreToolUse` guardrails (destructive Bash + edit discipline)
@@ -646,19 +646,19 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "rm\\s\+\-rf|rm -rf" omo/scripts/hook-router.sh omo/scripts/* || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/pretool/patterns.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/pretool/patterns.log
 
   Scenario: Decision output is valid JSON
     Tool: Bash
     Steps:
       1. rg -n "decision" omo/scripts/hook-router.sh
-    Evidence: .sisyphus/evidence/cc-omo-parity/pretool/decision-fields.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/pretool/decision-fields.log
   ```
 
 - [x] 13. Finalize state schemas + session identification strategy
 
   **What to do**:
-  - Choose and document a single schema for `.sisyphus/boulder.json` and `.sisyphus/cc-omo/runtime.local.json`.
+  - Choose and document a single schema for `.agent-kit/boulder.json` and `.agent-kit/cc-omo/runtime.local.json`.
   - Decide how scripts key circuit breakers:
     - Prefer `session_id` from hook stdin if available.
     - If not available, fall back to a repo-local key (e.g., "global"), and keep circuit breakers still bounded.
@@ -691,19 +691,19 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. test -f omo/STATE.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/state/state-doc.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/state/state-doc.log
 
   Scenario: Scripts reference canonical keys
     Tool: Bash
     Steps:
       1. rg -n "planPath|currentTask|stopBlocks|max" omo/scripts -S || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/state/key-usage.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/state/key-usage.log
   ```
 
 - [x] 14. Implement `/omo:stop-continuation` escape hatch
 
   **What to do**:
-  - Skill sets `stopContinuation.disabled=true` in `.sisyphus/cc-omo/runtime.local.json` (with reason + timestamp).
+  - Skill sets `stopContinuation.disabled=true` in `.agent-kit/cc-omo/runtime.local.json` (with reason + timestamp).
   - Ensure `Stop` hook and any continuation logic always checks this first.
 
   **Must NOT do**:
@@ -731,13 +731,13 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "stopContinuation" omo/skills/stop-continuation/SKILL.md omo/scripts -S
-    Evidence: .sisyphus/evidence/cc-omo-parity/escape-hatch/toggle.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/escape-hatch/toggle.log
 
   Scenario: Stop hook checks disabled first
     Tool: Bash
     Steps:
       1. rg -n "stopContinuation\.disabled" omo/scripts/hook-router.sh
-    Evidence: .sisyphus/evidence/cc-omo-parity/escape-hatch/checked-first.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/escape-hatch/checked-first.log
   ```
 
 - [x] 15. Implement `/omo:ulw` command toggle (runtime state)
@@ -771,25 +771,25 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "ulw" omo/skills/ulw/SKILL.md omo/scripts -S
-    Evidence: .sisyphus/evidence/cc-omo-parity/ulw/state-write.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/ulw/state-write.log
 
   Scenario: Stop hook consults ulw.enabled
     Tool: Bash
     Steps:
       1. rg -n "ulw\.enabled" omo/scripts/hook-router.sh
-    Evidence: .sisyphus/evidence/cc-omo-parity/ulw/stop-check.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/ulw/stop-check.log
   ```
 
 - [x] 16. Implement `/omo:plan` (write plan + init boulder)
 
   **What to do**:
   - Skill runs in plan discipline (`permissionMode: plan` if supported) and generates:
-    - `.sisyphus/plans/<slug>.md` checklist plan
-    - `.sisyphus/boulder.json` pointing to it (`active=true`, `status=in_progress`, `currentTask` set)
-  - Ensure `.sisyphus/` is created if missing.
+    - `.agent-kit/plans/<slug>.md` checklist plan
+    - `.agent-kit/boulder.json` pointing to it (`active=true`, `status=in_progress`, `currentTask` set)
+  - Ensure `.agent-kit/` is created if missing.
 
   **Must NOT do**:
-  - Do not require existing `.sisyphus/` directories.
+  - Do not require existing `.agent-kit/` directories.
 
   **Recommended Agent Profile**:
   - **Category**: `deep` (plan artifact contract)
@@ -802,7 +802,7 @@ Wave 4 (Selftest + docs + hardening)
 
   **References**:
   - `design/workflows/plan-and-start-work.md` - plan format + boulder init rules
-  - Existing OMO plan conventions: `.sisyphus/plans/` and this repo's planner outputs
+  - Existing OMO plan conventions: `.agent-kit/plans/` and this repo's planner outputs
 
   **Acceptance Criteria**:
   - [ ] Selftest scenario "Plan Creation" passes (`design/selftest.md`)
@@ -812,21 +812,21 @@ Wave 4 (Selftest + docs + hardening)
   Scenario: Plan skill writes artifacts
     Tool: Bash
     Steps:
-      1. rg -n "\.sisyphus/plans" omo/skills/plan/SKILL.md omo/scripts -S
+      1. rg -n "\.agent-kit/plans" omo/skills/plan/SKILL.md omo/scripts -S
       2. rg -n "boulder\.json" omo/skills/plan/SKILL.md omo/scripts -S
-    Evidence: .sisyphus/evidence/cc-omo-parity/plan/artifact-paths.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/plan/artifact-paths.log
 
   Scenario: boulder schema fields present
     Tool: Bash
     Steps:
       1. rg -n "active|status|currentTask|planPath" omo/STATE.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/plan/schema.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/plan/schema.log
   ```
 
 - [x] 17. Implement `/omo:start-work` (resume + task advancement protocol)
 
   **What to do**:
-  - Skill reads `.sisyphus/boulder.json`; if missing/inactive, guide to `/omo:plan`.
+  - Skill reads `.agent-kit/boulder.json`; if missing/inactive, guide to `/omo:plan`.
   - If active, it must:
     - open the plan file
     - identify `currentTask`
@@ -861,13 +861,13 @@ Wave 4 (Selftest + docs + hardening)
     Steps:
       1. rg -n "boulder\.json" omo/skills/start-work/SKILL.md omo/scripts -S
       2. rg -n "planPath" omo/skills/start-work/SKILL.md omo/scripts -S
-    Evidence: .sisyphus/evidence/cc-omo-parity/start-work/reads-state.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/start-work/reads-state.log
 
   Scenario: done condition documented
     Tool: Bash
     Steps:
       1. rg -n "status=done|active=false|done" omo/STATE.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/start-work/done-condition.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/start-work/done-condition.log
   ```
 
 - [x] 18. Implement `Stop` hook continuation enforcement (bounded)
@@ -910,19 +910,19 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n '"decision"\s*:\s*"block"' omo/scripts/hook-router.sh
-    Evidence: .sisyphus/evidence/cc-omo-parity/stop/block-json.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/stop/block-json.log
 
   Scenario: Circuit breakers present
     Tool: Bash
     Steps:
       1. rg -n "max.*stop|cooldown|stopBlocks" omo/scripts/hook-router.sh omo/scripts/state-*.sh
-    Evidence: .sisyphus/evidence/cc-omo-parity/stop/circuit-breakers.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/stop/circuit-breakers.log
   ```
 
 - [x] 19. Implement Ralph loop (`/omo:ralph-loop` + `/omo:cancel-ralph`)
 
   **What to do**:
-  - Implement skills to create/cancel `.sisyphus/ralph-loop.local.md` per `design/workflows/ralph-loop.md`.
+  - Implement skills to create/cancel `.agent-kit/ralph-loop.local.md` per `design/workflows/ralph-loop.md`.
   - Ensure Stop hook detects:
     - `status: active`
     - iteration count and max
@@ -953,13 +953,13 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "ralph-loop\.local\.md" omo/skills/ralph-loop/SKILL.md omo/skills/cancel-ralph/SKILL.md omo/scripts -S
-    Evidence: .sisyphus/evidence/cc-omo-parity/ralph/state-path.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/ralph/state-path.log
 
   Scenario: Done marker strategy documented
     Tool: Bash
     Steps:
       1. rg -n "RALPH_DONE" omo/STATE.md omo/scripts -S || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/ralph/done-marker.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/ralph/done-marker.log
   ```
 
 - [x] 20. Implement `/omo:handoff` continuation summary
@@ -970,7 +970,7 @@ Wave 4 (Selftest + docs + hardening)
     - currentTask
     - last known errors (if available)
     - how to resume (`/omo:start-work`) and how to escape
-  - Choose a deterministic path, e.g. `.sisyphus/handoff/last.md` (overwrite) or timestamped.
+  - Choose a deterministic path, e.g. `.agent-kit/handoff/last.md` (overwrite) or timestamped.
 
   **Must NOT do**:
   - Do not include secrets from hook inputs or environment.
@@ -989,28 +989,28 @@ Wave 4 (Selftest + docs + hardening)
   - Existing OMO: `src/features/builtin-commands/templates/handoff.ts`
 
   **Acceptance Criteria**:
-  - [ ] Running `/omo:handoff` creates/updates the handoff file under `.sisyphus/`
+  - [ ] Running `/omo:handoff` creates/updates the handoff file under `.agent-kit/`
 
   **QA Scenarios**:
   ```
   Scenario: Handoff path referenced
     Tool: Bash
     Steps:
-      1. rg -n "\.sisyphus/.*handoff" omo/skills/handoff/SKILL.md omo/scripts -S || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/handoff/path.log
+      1. rg -n "\.agent-kit/.*handoff" omo/skills/handoff/SKILL.md omo/scripts -S || true
+    Evidence: .agent-kit/evidence/cc-omo-parity/handoff/path.log
 
   Scenario: Handoff includes escape hatch reminder
     Tool: Bash
     Steps:
       1. rg -n "/omo:stop-continuation" omo/skills/handoff/SKILL.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/handoff/escape-hatch.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/handoff/escape-hatch.log
   ```
 
 - [x] 21. Implement `/omo:selftest` (agent-executable parity harness)
 
   **What to do**:
   - Implement a selftest skill that executes the scenarios in `design/selftest.md` inside a single CC session.
-  - Ensure evidence logs are written under `.sisyphus/evidence/cc-omo-parity/<area>/...`.
+  - Ensure evidence logs are written under `.agent-kit/evidence/cc-omo-parity/<area>/...`.
   - Ensure selftest never spawns `claude` via Bash.
 
   **Must NOT do**:
@@ -1039,13 +1039,13 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "Plugin Loads|Keyword Ultrawork Injection|Escape Hatch|Plan Creation|Start Work Resume|Ralph Loop|PreToolUse" omo/skills/selftest/SKILL.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/selftest/scenario-refs.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/selftest/scenario-refs.log
 
   Scenario: Selftest uses evidence path convention
     Tool: Bash
     Steps:
       1. rg -n "cc-omo-parity" omo/skills/selftest/SKILL.md omo/scripts -S
-    Evidence: .sisyphus/evidence/cc-omo-parity/selftest/evidence-path.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/selftest/evidence-path.log
   ```
 
 - [x] 22. Document Tier B deferrals + Tier C gaps (explicit non-parity)
@@ -1083,13 +1083,13 @@ Wave 4 (Selftest + docs + hardening)
     Steps:
       1. rg -n "Tier C" omo/README.md
       2. rg -n "hidden model override|native tools|nested" omo/README.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/docs/tier-c.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/docs/tier-c.log
 
   Scenario: Tier B deferrals listed
     Tool: Bash
     Steps:
       1. rg -n "Tier B" omo/README.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/docs/tier-b.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/docs/tier-b.log
   ```
 
 - [x] 23. Permissions posture documentation (no default settings side effects)
@@ -1123,13 +1123,13 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "rm\\s\+\-rf|mkfs|dd\\s\+if=" omo/README.md || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/docs/deny-patterns.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/docs/deny-patterns.log
 
   Scenario: No settings.json shipped
     Tool: Bash
     Steps:
       1. test ! -f omo/settings.json || exit 1
-    Evidence: .sisyphus/evidence/cc-omo-parity/docs/no-settings-json.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/docs/no-settings-json.log
   ```
 
 - [x] 24. Compatibility validation + selftest pass criteria
@@ -1160,7 +1160,7 @@ Wave 4 (Selftest + docs + hardening)
   - `design/selftest.md` - scenario expectations
 
   **Acceptance Criteria**:
-  - [ ] Documented smoke-run produces evidence under `.sisyphus/evidence/cc-omo-parity/final/`
+  - [ ] Documented smoke-run produces evidence under `.agent-kit/evidence/cc-omo-parity/final/`
 
   **QA Scenarios**:
   ```
@@ -1168,14 +1168,14 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "selftest passes" omo/README.md omo/skills/selftest/SKILL.md || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/final/pass-criteria.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/final/pass-criteria.log
 
   Scenario: Compatibility notes included
     Tool: Bash
     Steps:
       1. rg -n "Claude Code" omo/README.md
       2. rg -n "jq|bash" omo/README.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/final/compatibility.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/final/compatibility.log
   ```
 
 - [x] 25. Add "active persona" state + prompt injection glue
@@ -1211,13 +1211,13 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "sisyphus|hephaestus|prometheus|atlas" omo/STATE.md omo/README.md || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/persona/keys.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/persona/keys.log
 
   Scenario: Router injects persona block
     Tool: Bash
     Steps:
       1. rg -n "activePersona|persona" omo/scripts/hook-router.sh omo/scripts/state-read.sh omo/scripts/state-write.sh || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/persona/injection-glue.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/persona/injection-glue.log
   ```
 
 - [x] 26. Add main-session persona definitions (agents)
@@ -1231,7 +1231,7 @@ Wave 4 (Selftest + docs + hardening)
     - `hephaestus`: deep autonomous worker (but no nested orchestration).
 
   **Must NOT do**:
-  - Do not let Prometheus write non-markdown or outside `.sisyphus/` (enforce via instructions + PreToolUse where possible).
+  - Do not let Prometheus write non-markdown or outside `.agent-kit/` (enforce via instructions + PreToolUse where possible).
 
   **Recommended Agent Profile**:
   - **Category**: `writing`
@@ -1258,13 +1258,13 @@ Wave 4 (Selftest + docs + hardening)
       2. test -f omo/agents/hephaestus.md
       3. test -f omo/agents/prometheus.md
       4. test -f omo/agents/atlas.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/persona/agent-files.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/persona/agent-files.log
 
   Scenario: Prometheus mentions md-only constraint
     Tool: Bash
     Steps:
-      1. rg -n "\.sisyphus/|markdown" omo/agents/prometheus.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/persona/prometheus-constraint.log
+      1. rg -n "\.agent-kit/|markdown" omo/agents/prometheus.md
+    Evidence: .agent-kit/evidence/cc-omo-parity/persona/prometheus-constraint.log
   ```
 
 - [x] 27. Add non-fork skills to switch persona (`/omo:sisyphus`, etc.)
@@ -1301,13 +1301,13 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. for s in sisyphus hephaestus prometheus atlas; do test -f "omo/skills/$s/SKILL.md"; done
-    Evidence: .sisyphus/evidence/cc-omo-parity/persona/skill-files.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/persona/skill-files.log
 
   Scenario: Persona skills are non-fork
     Tool: Bash
     Steps:
       1. rg -n "context:\s*fork" omo/skills/sisyphus/SKILL.md omo/skills/hephaestus/SKILL.md omo/skills/prometheus/SKILL.md omo/skills/atlas/SKILL.md && exit 1 || true
-    Evidence: .sisyphus/evidence/cc-omo-parity/persona/non-fork.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/persona/non-fork.log
   ```
 
 - [x] 28. Extend selftest to validate persona switching
@@ -1343,14 +1343,14 @@ Wave 4 (Selftest + docs + hardening)
     Tool: Bash
     Steps:
       1. rg -n "omo:sisyphus|omo:hephaestus|omo:prometheus|omo:atlas" omo/skills/selftest/SKILL.md
-    Evidence: .sisyphus/evidence/cc-omo-parity/selftest/persona-refs.log
+    Evidence: .agent-kit/evidence/cc-omo-parity/selftest/persona-refs.log
   ```
 
 ---
 
 ## Final Verification Wave
 
-- F1. Run CC selftest scenarios end-to-end (`design/selftest.md`) and archive evidence under `.sisyphus/evidence/cc-omo-parity/final/`.
+- F1. Run CC selftest scenarios end-to-end (`design/selftest.md`) and archive evidence under `.agent-kit/evidence/cc-omo-parity/final/`.
 - F2. Run repo checks: `bun test && bun run typecheck && bun run build`.
 
 ---

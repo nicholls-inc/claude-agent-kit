@@ -5,7 +5,7 @@
 ## Tier A (implemented)
 
 - Ultrawork trigger via `ulw`/`ultrawork` keyword and `/omo:ulw` skill.
-- Plan to execution flow via `/omo:plan` and `/omo:start-work` using `.sisyphus/boulder.json`.
+- Plan to execution flow via `/omo:plan` and `/omo:start-work` using `.agent-kit/boulder.json`.
 - Bounded continuation enforcement in Stop hook with max blocks, cooldown, and escape hatch.
 - Session resume injection from active boulder state on `SessionStart`.
 - Leaf specialists: explore, librarian, oracle, metis, momus.
@@ -42,7 +42,7 @@ The plugin does not ship `omo/settings.json` and does not auto-change user permi
 ## Selftest Pass Criteria
 
 Selftest passes when:
-- evidence logs are written under `.sisyphus/evidence/cc-omo-parity/<area>/...` for each scenario
+- evidence logs are written under `.agent-kit/evidence/cc-omo-parity/<area>/...` for each scenario
 - plugin validation commands report no errors in a real plugin runtime
 - destructive Bash guard scenario is blocked
 
@@ -50,5 +50,5 @@ Selftest passes when:
 
 1. Enable plugin in Claude Code.
 2. Run `/plugin validate` and `/plugin errors`.
-3. Run `/omo:selftest` and collect evidence under `.sisyphus/evidence/cc-omo-parity/final/`.
+3. Run `/omo:selftest` and collect evidence under `.agent-kit/evidence/cc-omo-parity/final/`.
 4. Confirm escape hatch works with `/omo:stop-continuation`.

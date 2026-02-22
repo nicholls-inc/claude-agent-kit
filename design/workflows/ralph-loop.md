@@ -17,7 +17,7 @@ In CC this is implemented as:
 ## State
 
 Gitignored repo-local file:
-- `.sisyphus/ralph-loop.local.md`
+- `.agent-kit/ralph-loop.local.md`
 
 Example format:
 
@@ -37,7 +37,7 @@ done_marker: "RALPH_DONE"
 
 ## Start Behavior (`/omo:ralph-loop`)
 
-1. Write `.sisyphus/ralph-loop.local.md` with `status: active` and the `goal`.
+1. Write `.agent-kit/ralph-loop.local.md` with `status: active` and the `goal`.
 2. Instruct the coordinator to emit `RALPH_DONE` when finished.
 
 ## Stop-hook Behavior

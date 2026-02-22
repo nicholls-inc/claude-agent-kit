@@ -69,7 +69,7 @@ When ultrawork is active, the coordinator follows this loop:
 Ultrawork needs minimal durable state for circuit breakers.
 
 Recommended gitignored repo-local state file:
-- `.sisyphus/cc-omo/runtime.local.json`
+- `.agent-kit/cc-omo/runtime.local.json`
 
 Minimum schema (keyed by `session_id`):
 

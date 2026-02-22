@@ -5,7 +5,7 @@ description: Switch main-session persona to hephaestus (deep autonomous executio
 
 # Switch Persona: Hephaestus
 
-Set runtime `activePersona` to `hephaestus` in `.sisyphus/cc-omo/runtime.local.json` using inline execution.
+Set runtime `activePersona` to `hephaestus` in `.agent-kit/cc-omo/runtime.local.json` using inline execution.
 
 ## Execute
 1. Ensure runtime file exists (create with `version=1` if needed).

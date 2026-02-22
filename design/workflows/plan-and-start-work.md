@@ -15,10 +15,10 @@ Recreate OMO's Prometheus (planning) + Atlas (/start-work execution) split:
 
 ## Artifacts (repo state of truth)
 
-- `.sisyphus/plans/<plan-slug>.md` (plan)
-- `.sisyphus/boulder.json` (resume anchor)
-- `.sisyphus/notepads/<plan-slug>/...` (optional evidence/notes)
-- `.sisyphus/cc-omo/runtime.local.json` (gitignored: counters, circuit breakers)
+- `.agent-kit/plans/<plan-slug>.md` (plan)
+- `.agent-kit/boulder.json` (resume anchor)
+- `.agent-kit/notepads/<plan-slug>/...` (optional evidence/notes)
+- `.agent-kit/cc-omo/runtime.local.json` (gitignored: counters, circuit breakers)
 
 ## Plan Format
 
@@ -42,7 +42,7 @@ Recreate OMO's Prometheus (planning) + Atlas (/start-work execution) split:
 
 ## Boulder State File
 
-`.sisyphus/boulder.json` points at the active plan and progress.
+`.agent-kit/boulder.json` points at the active plan and progress.
 
 Recommended schema:
 
@@ -50,7 +50,7 @@ Recommended schema:
 {
   "version": 1,
   "active": true,
-  "planPath": ".sisyphus/plans/2026-02-22-cc-omo-parity.md",
+  "planPath": ".agent-kit/plans/2026-02-22-cc-omo-parity.md",
   "status": "in_progress",
   "currentTask": { "number": 1, "label": "Define plugin-spec.md" },
   "updatedAt": "2026-02-22T17:25:00Z"
@@ -66,17 +66,17 @@ Rules:
 ### `/omo:plan`
 
 1. Run in planning discipline (`permissionMode: plan`).
-2. Write `.sisyphus/plans/<slug>.md`.
-3. Initialize `.sisyphus/boulder.json` to `active=true` and `status=in_progress`.
+2. Write `.agent-kit/plans/<slug>.md`.
+3. Initialize `.agent-kit/boulder.json` to `active=true` and `status=in_progress`.
 
 ### `/omo:start-work`
 
-1. Read `.sisyphus/boulder.json`.
+1. Read `.agent-kit/boulder.json`.
 2. If missing/inactive -> deterministic guidance (usually: run `/omo:plan`).
 3. If active -> execute tasks in order, updating:
    - the plan checklist
    - `currentTask` in boulder
-   - verification evidence under `.sisyphus/notepads/<plan>/...` (optional)
+   - verification evidence under `.agent-kit/notepads/<plan>/...` (optional)
 4. When finished -> set `status=done`, `active=false`.
 
 ### Resume Injection (`SessionStart`)

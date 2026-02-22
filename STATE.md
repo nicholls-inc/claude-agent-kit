@@ -7,13 +7,13 @@ This file defines the canonical state keys used by `omo/scripts/*.sh` and `omo/s
 - `version` is an integer.
 - Unknown versions must fail open (allow Stop; do not block).
 
-## `.sisyphus/boulder.json`
+## `.agent-kit/boulder.json`
 
 ```json
 {
   "version": 1,
   "active": true,
-  "planPath": ".sisyphus/plans/<slug>.md",
+  "planPath": ".agent-kit/plans/<slug>.md",
   "status": "in_progress",
   "currentTask": { "number": 1, "label": "Task title" },
   "updatedAt": "2026-02-22T19:00:00Z"
@@ -24,7 +24,7 @@ Rules:
 - `active=false` or `status=done` means continuation should not be enforced from boulder.
 - Missing/corrupt boulder must fail open.
 
-## `.sisyphus/cc-omo/runtime.local.json`
+## `.agent-kit/cc-omo/runtime.local.json`
 
 ```json
 {
@@ -59,7 +59,7 @@ Persona values:
 - `prometheus`
 - `atlas`
 
-## `.sisyphus/ralph-loop.local.md`
+## `.agent-kit/ralph-loop.local.md`
 
 ```md
 # ralph-loop

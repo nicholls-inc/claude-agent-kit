@@ -8,8 +8,8 @@ description: Enable ultrawork mode - a disciplined "continue until done" executi
 Enable ultrawork in runtime state and proceed with strict execution discipline.
 
 ## Execute
-1. Ensure `.sisyphus/cc-omo/` exists.
-2. Read `.sisyphus/cc-omo/runtime.local.json` (or `{}` if missing).
+1. Ensure `.agent-kit/cc-omo/` exists.
+2. Read `.agent-kit/cc-omo/runtime.local.json` (or `{}` if missing).
 3. Set:
    - `version=1`
    - `sessions.<session_or_global>.ulw.enabled=true`
@@ -21,4 +21,4 @@ Enable ultrawork in runtime state and proceed with strict execution discipline.
 ## Constraints
 - Never attempt hidden model override.
 - Keep this inline (non-fork skill).
-- Use `.sisyphus/cc-omo/runtime.local.json` as state of truth.
+- Use `.agent-kit/cc-omo/runtime.local.json` as state of truth.

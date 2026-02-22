@@ -14,16 +14,16 @@ set -euo pipefail
 #   - On ANY error: log to stderr, exit 0, print nothing to stdout (fail-open).
 #
 # ENV:
-#   OMO_DEBUG=1  → write diagnostics to .sisyphus/evidence/cc-omo-parity/debug/
+#   OMO_DEBUG=1  → write diagnostics to .agent-kit/evidence/cc-omo-parity/debug/
 #                   (never to stdout)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_DIR
 
-readonly DEBUG_DIR=".sisyphus/evidence/cc-omo-parity/debug"
-readonly BOULDER_FILE=".sisyphus/boulder.json"
-readonly RUNTIME_FILE=".sisyphus/cc-omo/runtime.local.json"
-readonly RALPH_FILE=".sisyphus/ralph-loop.local.md"
+readonly DEBUG_DIR=".agent-kit/evidence/cc-omo-parity/debug"
+readonly BOULDER_FILE=".agent-kit/boulder.json"
+readonly RUNTIME_FILE=".agent-kit/cc-omo/runtime.local.json"
+readonly RALPH_FILE=".agent-kit/ralph-loop.local.md"
 readonly SESSION_KEY_DEFAULT="global"
 readonly STOP_MAX_BLOCKS=8
 readonly STOP_COOLDOWN_SECONDS=3
@@ -283,7 +283,7 @@ EOF
       cat <<'EOF'
 Persona: prometheus
 - Operate as planner-only unless user asks to execute.
-- Prefer markdown planning artifacts under .sisyphus/.
+- Prefer markdown planning artifacts under .agent-kit/.
 - Avoid implementation edits while in planning mode.
 EOF
       ;;
@@ -382,7 +382,7 @@ handle_pre_tool_use() {
   if [[ "${persona}" == "prometheus" ]]; then
     if [[ "${tool_name}" == "Write" || "${tool_name}" == "Edit" || "${tool_name}" == "MultiEdit" ]]; then
       if printf '%s' "${cmd}" | grep -Eiq '([^[:space:]]+\.(ts|tsx|js|jsx|json|yaml|yml|sh|py|go|rs|java|rb|php|c|cpp))'; then
-        _emit_block_json "Prometheus persona is planning-only: write markdown artifacts under .sisyphus/"
+        _emit_block_json "Prometheus persona is planning-only: write markdown artifacts under .agent-kit/"
         return 0
       fi
     fi

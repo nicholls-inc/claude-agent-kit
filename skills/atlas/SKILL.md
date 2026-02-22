@@ -5,7 +5,7 @@ description: Switch main-session persona to atlas (plan execution coordinator mo
 
 # Switch Persona: Atlas
 
-Set runtime `activePersona` to `atlas` in `.sisyphus/cc-omo/runtime.local.json` using inline execution.
+Set runtime `activePersona` to `atlas` in `.agent-kit/cc-omo/runtime.local.json` using inline execution.
 
 ## Execute
 1. Ensure runtime file exists (create with `version=1` if needed).

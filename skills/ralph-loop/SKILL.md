@@ -8,7 +8,7 @@ description: Start a self-referential development loop that runs until task comp
 Create loop state and activate Stop-hook continuation for the loop.
 
 ## Execute
-1. Write `.sisyphus/ralph-loop.local.md`:
+1. Write `.agent-kit/ralph-loop.local.md`:
    - `status: active`
    - `created_at: <now>`
    - `max_iterations: 8`

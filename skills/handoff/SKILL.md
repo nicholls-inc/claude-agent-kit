@@ -8,8 +8,8 @@ description: Create a detailed context summary for continuing work in a new sess
 Write a deterministic handoff file for continuation.
 
 ## Execute
-1. Create `.sisyphus/handoff/` if missing.
-2. Write `.sisyphus/handoff/last.md` containing:
+1. Create `.agent-kit/handoff/` if missing.
+2. Write `.agent-kit/handoff/last.md` containing:
    - active plan path
    - current task
    - unresolved errors (if known)

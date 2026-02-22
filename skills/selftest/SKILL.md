@@ -22,7 +22,7 @@ Run the documented parity harness and write evidence files.
   - `/omo:atlas`
 
 ## Evidence
-- Write logs under `.sisyphus/evidence/cc-omo-parity/<area>/<scenario>.log`.
+- Write logs under `.agent-kit/evidence/cc-omo-parity/<area>/<scenario>.log`.
 - Include command output snippets and pass/fail result per scenario.
 
 ## Constraints

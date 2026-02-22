@@ -11,7 +11,7 @@ set -euo pipefail
 #   - Never print errors to stdout.
 #
 # USAGE:
-#   ./state-read.sh .sisyphus/boulder.json
+#   ./state-read.sh .agent-kit/boulder.json
 #   # prints JSON content or {} if missing/corrupt
 
 STATE_FILE="${1:-}"

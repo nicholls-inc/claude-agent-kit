@@ -17,7 +17,7 @@ set -euo pipefail
 
 readonly _MAX_PROMPT_LENGTH=2000
 readonly _REDACTED="[REDACTED]"
-readonly _HOOK_INPUT_DEBUG_DIR=".sisyphus/evidence/cc-omo-parity/hook-input"
+readonly _HOOK_INPUT_DEBUG_DIR=".agent-kit/evidence/cc-omo-parity/hook-input"
 
 # --- Gather raw JSON input ---
 _RAW_JSON="${SANITIZE_INPUT:-}"

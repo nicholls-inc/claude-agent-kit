@@ -8,7 +8,7 @@ description: Cancel the currently active Ralph Loop.
 Deactivate the loop state so Stop hook no longer enforces Ralph continuation.
 
 ## Execute
-1. If `.sisyphus/ralph-loop.local.md` exists, set `status: cancelled`.
+1. If `.agent-kit/ralph-loop.local.md` exists, set `status: cancelled`.
 2. Keep previous loop metadata for auditability.
 3. Print a short confirmation that Ralph continuation is disabled.
 

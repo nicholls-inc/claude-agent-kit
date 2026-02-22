@@ -85,8 +85,8 @@ Provide a Claude Code plugin that makes "right-model-for-the-job" usage easy and
 
 ### QA Policy (Agent-Executable)
 Every task includes QA scenarios. Evidence is saved to:
-- `.sisyphus/evidence/task-<N>-<slug>.txt` (terminal output)
-- `.sisyphus/evidence/task-<N>-<slug>.png` (if screenshots are used)
+- `.agent-kit/evidence/task-<N>-<slug>.txt` (terminal output)
+- `.agent-kit/evidence/task-<N>-<slug>.png` (if screenshots are used)
 
 ---
 
@@ -141,7 +141,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
     Steps:
       1. Run: claude --plugin-dir ./claude-agent-kit --debug
       2. Confirm debug output shows plugin discovered + no manifest errors
-    Evidence: .sisyphus/evidence/task-1-plugin-load.txt
+    Evidence: .agent-kit/evidence/task-1-plugin-load.txt
   ```
 
 - [ ] 2. Define routing policy + model mapping
@@ -180,7 +180,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
     Steps:
       1. Open policy doc
       2. Verify each v1 agent/skill has a model assignment and usage guidance
-    Evidence: .sisyphus/evidence/task-2-policy-review.txt
+    Evidence: .agent-kit/evidence/task-2-policy-review.txt
   ```
 
 - [ ] 3. Inventory + recreate repo agents as Claude Code subagents (close to 1:1)
@@ -245,7 +245,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
     Steps:
       1. Run: claude --plugin-dir ./claude-agent-kit
       2. In session, open /agents and confirm all recreated agents appear
-    Evidence: .sisyphus/evidence/task-3-agents-listed.txt
+    Evidence: .agent-kit/evidence/task-3-agents-listed.txt
   ```
 
 - [ ] 4. Create skill (slash command) roster skeletons
@@ -287,7 +287,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
       1. Run: claude --plugin-dir ./claude-agent-kit
       2. Type: /help
       3. Confirm skills listed under claude-agent-kit namespace
-    Evidence: .sisyphus/evidence/task-4-skills-listed.txt
+    Evidence: .agent-kit/evidence/task-4-skills-listed.txt
   ```
 
 - [ ] 5. Implement Explore workflow (manual command + delegation-friendly)
@@ -321,7 +321,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
       1. Start: claude --plugin-dir ./claude-agent-kit
       2. Run: /claude-agent-kit:explore "summarize this repo structure"
       3. Verify output includes the required sections and contains no edit instructions
-    Evidence: .sisyphus/evidence/task-5-explore-output.txt
+    Evidence: .agent-kit/evidence/task-5-explore-output.txt
   ```
 
 - [ ] 6. Implement Plan workflow (Opus / opusplan)
@@ -356,7 +356,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
       1. Start: claude --plugin-dir ./claude-agent-kit
       2. Run: /claude-agent-kit:plan "refactor a module safely"
       3. Verify includes IN/OUT and verification commands
-    Evidence: .sisyphus/evidence/task-6-plan-output.txt
+    Evidence: .agent-kit/evidence/task-6-plan-output.txt
   ```
 
 - [ ] 7. Implement Implement + Review workflows
@@ -397,7 +397,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
       1. Start: claude --plugin-dir ./claude-agent-kit
       2. Run: /claude-agent-kit:review
       3. Confirm no files changed (git status clean)
-    Evidence: .sisyphus/evidence/task-7-review-readonly.txt
+    Evidence: .agent-kit/evidence/task-7-review-readonly.txt
   ```
 
 - [ ] 8. Design Boulder workflow (one-shot "push the boulder") + limits
@@ -440,7 +440,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
       1. Start: claude --plugin-dir ./claude-agent-kit
       2. Run: /claude-agent-kit:boulder "do something impossible"
       3. Verify it terminates with a bounded failure report, not an endless loop
-    Evidence: .sisyphus/evidence/task-8-boulder-bounded.txt
+    Evidence: .agent-kit/evidence/task-8-boulder-bounded.txt
   ```
 
 - [ ] 9. Implement "Safe gate" command resolution strategy (lint + tests + build)
@@ -476,7 +476,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
     Steps:
       1. Run safe-gate script in a minimal repo fixture with no package scripts
       2. Verify it exits non-zero and explains how to configure overrides
-    Evidence: .sisyphus/evidence/task-9-safe-gate-missing.txt
+    Evidence: .agent-kit/evidence/task-9-safe-gate-missing.txt
   ```
 
 - [ ] 10. Enforce Boulder "Safe" completion via hooks (Stop/SubagentStop)
@@ -513,7 +513,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
       1. Start: claude --plugin-dir ./claude-agent-kit
       2. Run: /claude-agent-kit:boulder "make a small change"
       3. Verify it runs safe-gate, detects failure, and continues instead of stopping
-    Evidence: .sisyphus/evidence/task-10-stop-blocked.txt
+    Evidence: .agent-kit/evidence/task-10-stop-blocked.txt
   ```
 
 - [ ] 11. Add agent team templates (experimental)
@@ -546,7 +546,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
       1. Enable agent teams via env/settings
       2. Run template prompt in Claude Code
       3. Confirm team spawns and task list appears
-    Evidence: .sisyphus/evidence/task-11-team-spawn.txt
+    Evidence: .agent-kit/evidence/task-11-team-spawn.txt
   ```
 
 - [ ] 12. Provide a user-facing configuration story (enable/disable features)
@@ -585,7 +585,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
     Steps:
       1. Run: /claude-agent-kit:configure
       2. Verify .claude/settings.local.json updated as described
-    Evidence: .sisyphus/evidence/task-12-configure-settings.txt
+    Evidence: .agent-kit/evidence/task-12-configure-settings.txt
   ```
 
 - [ ] 13. Write usage docs + examples (day-to-day workflows)
@@ -623,7 +623,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
     Steps:
       1. Open README
       2. Confirm each skill has an example invocation and expected output shape
-    Evidence: .sisyphus/evidence/task-13-docs-check.txt
+    Evidence: .agent-kit/evidence/task-13-docs-check.txt
   ```
 
 - [ ] 14. Add troubleshooting + compatibility checks
@@ -656,7 +656,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
     Steps:
       1. Open troubleshooting section
       2. Confirm it contains fixes for the 3 most common issues
-    Evidence: .sisyphus/evidence/task-14-troubleshooting.txt
+    Evidence: .agent-kit/evidence/task-14-troubleshooting.txt
   ```
 
 - [ ] 15. Release readiness: versioning + optional marketplace packaging
@@ -687,7 +687,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
     Steps:
       1. Open CHANGELOG and manifest
       2. Confirm versions are consistent and bump guidance is present
-    Evidence: .sisyphus/evidence/task-15-versioning.txt
+    Evidence: .agent-kit/evidence/task-15-versioning.txt
   ```
 
 - [ ] 16. Bundle MCP servers to approximate oh-my-opencode tool surface
@@ -725,7 +725,7 @@ Wave 4 (Docs + troubleshooting + release readiness)
       1. Start: claude --plugin-dir ./claude-agent-kit --debug
       2. Run: /mcp
       3. Confirm plugin MCP servers are connected and tools are listed
-    Evidence: .sisyphus/evidence/task-16-mcp-loaded.txt
+    Evidence: .agent-kit/evidence/task-16-mcp-loaded.txt
   ```
 
 ---

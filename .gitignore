@@ -1,8 +1,8 @@
 # Dependencies
-.sisyphus/*
-!.sisyphus/rules/
-!.sisyphus/plans/
-!.sisyphus/boulder.json
+.agent-kit/*
+!.agent-kit/rules/
+!.agent-kit/plans/
+!.agent-kit/boulder.json
 node_modules/
 
 # Build output

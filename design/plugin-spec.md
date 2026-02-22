@@ -69,7 +69,7 @@ All events route to `${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.sh`.
 
 - `scripts/hook-router.sh`: the only hook entrypoint; reads stdin JSON and emits either injected context text (SessionStart/UserPromptSubmit) or decision JSON (PreToolUse/Stop).
 - `scripts/detect-ulw.sh`: keyword detection helper.
-- `scripts/state-read.sh` / `scripts/state-write.sh`: atomic reads/writes for `.sisyphus/boulder.json` and `.sisyphus/cc-omo/runtime.local.json`.
+- `scripts/state-read.sh` / `scripts/state-write.sh`: atomic reads/writes for `.agent-kit/boulder.json` and `.agent-kit/cc-omo/runtime.local.json`.
 - `scripts/sanitize-hook-input.sh`: defensive filtering of hook input fields.
 
 ## Skills (contracts)

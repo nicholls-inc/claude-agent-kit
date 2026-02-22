@@ -8,17 +8,17 @@ description: Create a durable, reviewable implementation plan for a complex task
 Generate a checklist plan and initialize boulder state.
 
 ## Execute
-1. Create `.sisyphus/plans/` if missing.
+1. Create `.agent-kit/plans/` if missing.
 2. Generate slug from `$ARGUMENTS` and current date.
-3. Write `.sisyphus/plans/<slug>.md` with sections:
+3. Write `.agent-kit/plans/<slug>.md` with sections:
    - Context
    - Tasks (`- [ ] 1. ...`)
    - Verification
-4. Write `.sisyphus/boulder.json`:
+4. Write `.agent-kit/boulder.json`:
    - `version=1`
    - `active=true`
    - `status="in_progress"`
-   - `planPath=".sisyphus/plans/<slug>.md"`
+   - `planPath=".agent-kit/plans/<slug>.md"`
    - `currentTask` set to first unchecked task
    - `updatedAt=<now>`
 5. Print: plan path, current task, and reminder to run `/omo:start-work`.
