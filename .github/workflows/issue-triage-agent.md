@@ -1,32 +1,43 @@
 ---
+description: |
+  Triages unlabeled issues by analyzing their title and body, applying one
+  of the allowed category labels, and leaving a brief comment explaining
+  the classification.
+
 on:
-  schedule: 0 14 * * 1-5
-  workflow_dispatch: null
+  schedule: daily on weekdays
+  workflow_dispatch:
+
 permissions:
   issues: read
+
+network: defaults
+
 imports:
-- github/gh-aw/.github/workflows/shared/mood.md@852cb06ad52958b402ed982b69957ffc57ca0619
-- github/gh-aw/.github/workflows/shared/reporting.md@852cb06ad52958b402ed982b69957ffc57ca0619
-safe-outputs:
-  add-comment: {}
-  add-labels:
-    allowed:
-    - bug
-    - feature
-    - enhancement
-    - documentation
-    - question
-    - help-wanted
-    - good-first-issue
-source: github/gh-aw/.github/workflows/issue-triage-agent.md@852cb06ad52958b402ed982b69957ffc57ca0619
-strict: true
-timeout-minutes: 5
+  - github/gh-aw/.github/workflows/shared/reporting.md@852cb06ad52958b402ed982b69957ffc57ca0619
+
 tools:
   github:
-    lockdown: true
-    toolsets:
-    - issues
-    - labels
+    lockdown: false
+    toolsets: [issues, labels]
+
+safe-outputs:
+  add-comment:
+    max: 10
+  add-labels:
+    allowed:
+      - bug
+      - feature
+      - enhancement
+      - documentation
+      - question
+      - help-wanted
+      - good-first-issue
+      - community
+
+timeout-minutes: 15
+source: github/gh-aw/.github/workflows/issue-triage-agent.md@852cb06ad52958b402ed982b69957ffc57ca0619
+strict: true
 engine: claude
 ---
 
