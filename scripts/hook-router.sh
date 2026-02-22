@@ -68,6 +68,39 @@ _emit_block_json() {
   printf '{"decision":"block","reason":%s}\n' "${escaped}"
 }
 
+# --- Telemetry helpers: fire-and-forget to Langfuse ---
+_telemetry_enabled() {
+  [[ -x "${SCRIPT_DIR}/langfuse-emit.sh" ]] && [[ -n "${LANGFUSE_BASE_URL:-}" ]]
+}
+
+_get_trace_id() {
+  printf '%s' "${HOOK_SESSION_ID:-$(date +%s%N 2>/dev/null || date +%s)}"
+}
+
+_emit_langfuse_event() {
+  _telemetry_enabled || return 0
+  local event_name="$1"
+  local metadata_json="${2:-"{}"}"
+  "${SCRIPT_DIR}/langfuse-emit.sh" event "$(_get_trace_id)" "${event_name}" "${metadata_json}" 2>/dev/null || true
+}
+
+_emit_langfuse_score() {
+  _telemetry_enabled || return 0
+  local score_name="$1"
+  local value="$2"
+  local data_type="${3:-NUMERIC}"
+  "${SCRIPT_DIR}/langfuse-emit.sh" score "$(_get_trace_id)" "${score_name}" "${value}" "${data_type}" 2>/dev/null || true
+}
+
+_now_ms() {
+  # Millisecond timestamp for latency measurement
+  if date +%s%N >/dev/null 2>&1; then
+    echo $(( $(date +%s%N) / 1000000 ))
+  else
+    echo $(( $(date +%s) * 1000 ))
+  fi
+}
+
 _read_json_file() {
   local file_path="$1"
   if [[ -x "${SCRIPT_DIR}/state-read.sh" ]]; then
@@ -329,23 +362,35 @@ _debug "event=${EVENT_TYPE}"
 # --- Handler functions (stubs for Wave 2) ---
 
 handle_session_start() {
+  local _start_ms; _start_ms="$(_now_ms)"
   _debug "handler=SessionStart"
+  local persona; persona="$(_active_persona)"
   _persona_injection_block
+  local has_resume="false"
   if _boulder_active; then
     printf '\n'
     _resume_block
+    has_resume="true"
   fi
+  local _end_ms; _end_ms="$(_now_ms)"
+  _emit_langfuse_event "hook.session_start" \
+    "{\"persona\":\"${persona}\",\"boulder_active\":${has_resume},\"has_resume\":${has_resume}}"
+  _emit_langfuse_score "hook.latency_ms" "$(( _end_ms - _start_ms ))"
 }
 
 handle_user_prompt_submit() {
+  local _start_ms; _start_ms="$(_now_ms)"
   _debug "handler=UserPromptSubmit"
+  local persona; persona="$(_active_persona)"
   _persona_injection_block
   local text="${HOOK_PROMPT:-}"
   if [[ -z "${text}" ]]; then
     text="${STDIN_JSON:-}"
   fi
+  local ulw_triggered="false"
   if [[ -x "${SCRIPT_DIR}/detect-ulw.sh" ]] && printf '%s' "${text}" | "${SCRIPT_DIR}/detect-ulw.sh"; then
     _runtime_set_ulw_enabled
+    ulw_triggered="true"
     printf '\n'
     cat <<'EOF'
 Ultrawork mode is active.
@@ -357,9 +402,14 @@ Execution contract:
 - Only stop when done or when /claude-agent-kit:stop-continuation is used.
 EOF
   fi
+  local _end_ms; _end_ms="$(_now_ms)"
+  _emit_langfuse_event "hook.user_prompt_submit" \
+    "{\"persona\":\"${persona}\",\"ulw_triggered\":${ulw_triggered}}"
+  _emit_langfuse_score "hook.latency_ms" "$(( _end_ms - _start_ms ))"
 }
 
 handle_pre_tool_use() {
+  local _start_ms; _start_ms="$(_now_ms)"
   _debug "handler=PreToolUse"
   local tool_name="${HOOK_TOOL_NAME:-}"
   local cmd="${HOOK_TOOL_COMMAND:-}"
@@ -370,40 +420,80 @@ handle_pre_tool_use() {
     cmd="${HOOK_PROMPT:-}"
   fi
 
+  local decision="allow"
+  local block_reason=""
+
   if [[ "${tool_name}" == "Bash" ]] || [[ "${tool_name}" == "bash" ]]; then
     if printf '%s' "${cmd}" | grep -Eiq '(^|[[:space:];|&])(rm[[:space:]]+-rf|mkfs([[:space:]]|$)|dd[[:space:]]+if=)'; then
+      decision="block"
+      block_reason="destructive_bash"
       _emit_block_json "Blocked destructive Bash pattern by safety guardrails"
-      return 0
     fi
   fi
 
-  local persona
-  persona="$(_active_persona)"
-  if [[ "${persona}" == "prometheus" ]]; then
-    if [[ "${tool_name}" == "Write" || "${tool_name}" == "Edit" || "${tool_name}" == "MultiEdit" ]]; then
-      if printf '%s' "${cmd}" | grep -Eiq '([^[:space:]]+\.(ts|tsx|js|jsx|json|yaml|yml|sh|py|go|rs|java|rb|php|c|cpp))'; then
-        _emit_block_json "Prometheus persona is planning-only: write markdown artifacts under .agent-kit/"
-        return 0
+  if [[ "${decision}" == "allow" ]]; then
+    local persona
+    persona="$(_active_persona)"
+    if [[ "${persona}" == "prometheus" ]]; then
+      if [[ "${tool_name}" == "Write" || "${tool_name}" == "Edit" || "${tool_name}" == "MultiEdit" ]]; then
+        if printf '%s' "${cmd}" | grep -Eiq '([^[:space:]]+\.(ts|tsx|js|jsx|json|yaml|yml|sh|py|go|rs|java|rb|php|c|cpp))'; then
+          decision="block"
+          block_reason="prometheus_write_guard"
+          _emit_block_json "Prometheus persona is planning-only: write markdown artifacts under .agent-kit/"
+        fi
       fi
     fi
   fi
+
+  local _end_ms; _end_ms="$(_now_ms)"
+  _emit_langfuse_event "hook.pretool" \
+    "{\"tool_name\":\"${tool_name}\",\"decision\":\"${decision}\",\"block_reason\":\"${block_reason}\"}"
+  _emit_langfuse_score "hook.latency_ms" "$(( _end_ms - _start_ms ))"
 }
 
 handle_stop() {
+  local _start_ms; _start_ms="$(_now_ms)"
   _debug "handler=Stop"
+
+  local decision="allow"
+  local ulw_is_active="false"
+  local boulder_is_active="false"
+  local ralph_is_active="false"
+  local ralph_iteration="0"
+  local stop_blocks="0"
+
   if _stop_continuation_disabled; then
+    local _end_ms; _end_ms="$(_now_ms)"
+    _emit_langfuse_event "hook.stop" \
+      "{\"decision\":\"allow\",\"stop_blocks\":0,\"ulw_active\":false,\"boulder_active\":false,\"ralph_active\":false,\"ralph_iteration\":0,\"reason\":\"continuation_disabled\"}"
+    _emit_langfuse_score "hook.latency_ms" "$(( _end_ms - _start_ms ))"
     return 0
   fi
 
-  local needs_block="false"
-  local ralph_is_active="false"
   if _ralph_active; then
     ralph_is_active="true"
+    ralph_iteration="$(sed -n 's/^iterations:[[:space:]]*//p' "${RALPH_FILE}" 2>/dev/null | awk 'NR==1{print; exit}')"
+    ralph_iteration="${ralph_iteration:-0}"
   fi
-  if _boulder_active || [[ "${ralph_is_active}" == "true" ]] || _ulw_enabled; then
+  if _boulder_active; then
+    boulder_is_active="true"
+  fi
+  if _ulw_enabled; then
+    ulw_is_active="true"
+  fi
+
+  local needs_block="false"
+  if [[ "${boulder_is_active}" == "true" ]] || [[ "${ralph_is_active}" == "true" ]] || [[ "${ulw_is_active}" == "true" ]]; then
     needs_block="true"
   fi
-  [[ "${needs_block}" == "true" ]] || return 0
+
+  if [[ "${needs_block}" != "true" ]]; then
+    local _end_ms; _end_ms="$(_now_ms)"
+    _emit_langfuse_event "hook.stop" \
+      "{\"decision\":\"allow\",\"stop_blocks\":0,\"ulw_active\":${ulw_is_active},\"boulder_active\":${boulder_is_active},\"ralph_active\":${ralph_is_active},\"ralph_iteration\":${ralph_iteration}}"
+    _emit_langfuse_score "hook.latency_ms" "$(( _end_ms - _start_ms ))"
+    return 0
+  fi
 
   local session_key
   session_key="$(_session_key)"
@@ -418,8 +508,13 @@ handle_stop() {
   now_epoch="$(_now_epoch)"
   last_stop="$(printf '%s' "${runtime_json}" | jq -r --arg sk "${session_key}" '.sessions[$sk].ulw.lastStopEpoch // 0' 2>/dev/null || echo "0")"
   blocks="$(printf '%s' "${runtime_json}" | jq -r --arg sk "${session_key}" '.sessions[$sk].ulw.stopBlocks // 0' 2>/dev/null || echo "0")"
+  stop_blocks="${blocks}"
 
   if [[ $((now_epoch - last_stop)) -lt ${STOP_COOLDOWN_SECONDS} ]]; then
+    local _end_ms; _end_ms="$(_now_ms)"
+    _emit_langfuse_event "hook.stop" \
+      "{\"decision\":\"allow\",\"stop_blocks\":${stop_blocks},\"ulw_active\":${ulw_is_active},\"boulder_active\":${boulder_is_active},\"ralph_active\":${ralph_is_active},\"ralph_iteration\":${ralph_iteration},\"reason\":\"cooldown\"}"
+    _emit_langfuse_score "hook.latency_ms" "$(( _end_ms - _start_ms ))"
     return 0
   fi
 
@@ -439,8 +534,14 @@ handle_stop() {
     if [[ -n "${disabled_json}" ]]; then
       _write_json_file "${RUNTIME_FILE}" "${disabled_json}" || true
     fi
+    local _end_ms; _end_ms="$(_now_ms)"
+    _emit_langfuse_event "hook.stop" \
+      "{\"decision\":\"allow\",\"stop_blocks\":${stop_blocks},\"ulw_active\":${ulw_is_active},\"boulder_active\":${boulder_is_active},\"ralph_active\":${ralph_is_active},\"ralph_iteration\":${ralph_iteration},\"reason\":\"max_blocks_auto_disabled\"}"
+    _emit_langfuse_score "hook.latency_ms" "$(( _end_ms - _start_ms ))"
     return 0
   fi
+
+  decision="block"
 
   local updated
   updated="$(printf '%s' "${runtime_json}" | jq -c --arg sk "${session_key}" --arg ts "$(_now_iso)" --argjson now "${now_epoch}" '
@@ -461,6 +562,11 @@ handle_stop() {
   fi
 
   _emit_block_json "Continuation active: finish work or use /claude-agent-kit:stop-continuation"
+
+  local _end_ms; _end_ms="$(_now_ms)"
+  _emit_langfuse_event "hook.stop" \
+    "{\"decision\":\"${decision}\",\"stop_blocks\":${stop_blocks},\"ulw_active\":${ulw_is_active},\"boulder_active\":${boulder_is_active},\"ralph_active\":${ralph_is_active},\"ralph_iteration\":${ralph_iteration}}"
+  _emit_langfuse_score "hook.latency_ms" "$(( _end_ms - _start_ms ))"
 }
 
 # --- Dispatch ---
