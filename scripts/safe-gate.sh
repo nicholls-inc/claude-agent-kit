@@ -44,7 +44,7 @@ split_semicolon_commands() {
   local IFS=';'
   read -r -a out <<< "$raw"
   for i in "${!out[@]}"; do
-    out[$i]="$(printf '%s' "${out[$i]}" | sed -e 's/^ *//' -e 's/ *$//')"
+    out[i]="$(printf '%s' "${out[i]}" | sed -e 's/^ *//' -e 's/ *$//')"
   done
 
   for c in "${out[@]}"; do
