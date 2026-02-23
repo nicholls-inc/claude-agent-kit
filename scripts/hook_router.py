@@ -22,6 +22,12 @@ import sys
 import time
 from datetime import datetime, timezone
 
+# Ensure plugin root is on sys.path so `from scripts.*` imports resolve
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_PLUGIN_ROOT = os.path.dirname(_SCRIPT_DIR)
+if _PLUGIN_ROOT not in sys.path:
+    sys.path.insert(0, _PLUGIN_ROOT)
+
 # --- Module imports (all Wave 1-2) ---
 from scripts._debug import debug
 from scripts.state import read_json, write_json
@@ -39,8 +45,7 @@ STOP_MAX_BLOCKS = 8
 STOP_COOLDOWN_SECONDS = 3
 
 # Resolve plugin root (parent of scripts/)
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PLUGIN_ROOT = os.path.dirname(SCRIPT_DIR)
+PLUGIN_ROOT = _PLUGIN_ROOT
 
 
 # --- Utility helpers ---
