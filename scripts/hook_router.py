@@ -166,7 +166,24 @@ def _boulder_active() -> bool:
 
     active = boulder.get("active", False)
     status = boulder.get("status", "")
-    return active is True and status != "done"
+    if not (active is True and status != "done"):
+        return False
+
+    # Staleness check — boulder from a previous session shouldn't block
+    updated_at = boulder.get("updatedAt", "")
+    if updated_at:
+        try:
+            updated = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
+            age_hours = (datetime.now(timezone.utc) - updated).total_seconds() / 3600
+            if age_hours > 4:
+                boulder["active"] = False
+                boulder["status"] = "stale_auto_cleared"
+                write_json(BOULDER_FILE, boulder)
+                return False
+        except Exception:
+            pass
+
+    return True
 
 
 def _ralph_active(hook_input) -> bool:
