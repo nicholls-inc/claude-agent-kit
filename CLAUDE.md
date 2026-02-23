@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## What This Is
 
-A multi-agent orchestration plugin for Claude Code. Provides persona-based workflows, planning and execution pipelines, specialist subagents, and continuation control. Pure-markdown plugin — no build step, no dependencies, no compiled code. All agents, skills, hooks, and docs are plain `.md` or `.json` files.
+A multi-agent orchestration plugin for Claude Code. Provides persona-based workflows, planning and execution pipelines, specialist subagents, and continuation control. Pure-markdown plugin — no build step, no dependencies, no compiled code. All agents, skills, hooks, and docs are plain `.md` or `.json` files. Runtime scripts are stdlib-only Python.
 
 ## Running Locally
 
@@ -15,14 +15,14 @@ claude --plugin-dir ./claude-agent-kit --debug
 ## Testing
 
 ```bash
-./tests/validate.sh
+python3 -m pytest tests/test_validate.py -v
 ```
 
-Validates: agent/skill frontmatter, `hooks.json` schema, shell script correctness, agent metadata fields (`category`, `costTier`), Python script syntax, and bidirectional consistency between `agents/*.md` and `docs/agent-mapping.md`. Exits 0 on success, 1 on failure. Runs in CI via `.github/workflows/validate.yml`.
+Validates: agent/skill frontmatter, `hooks.json` schema, Python script syntax, agent metadata fields (`category`, `costTier`), and bidirectional consistency between `agents/*.md` and `docs/agent-mapping.md`. Exits 0 on success, 1 on failure. Runs in CI via `.github/workflows/validate.yml`.
 
 Python unit tests for the dynamic prompt generator:
 ```bash
-python3 tests/test_build_sections.py
+python3 -m pytest tests/test_build_sections.py -v
 ```
 
 ## Architecture
@@ -55,7 +55,7 @@ Categories:
 
 ### Hooks (`hooks/hooks.json`)
 
-Four hooks, all dispatched through `scripts/hook-router.sh`:
+Four hooks, all dispatched through `scripts/hook_router.py`:
 - **SessionStart**: Injects active persona prompt + boulder resume context.
 - **UserPromptSubmit**: Injects persona prompt + detects ultrawork (ULW) triggers.
 - **PreToolUse**: Blocks destructive Bash commands; blocks code edits in `prometheus` persona.
@@ -71,11 +71,16 @@ Runtime state files (gitignored, not part of the plugin itself):
 
 ### Scripts (`scripts/`)
 
-- `hook-router.sh`: Central hook dispatcher (fail-open on errors).
-- `build_sections.py`: Dynamic prompt section generator (stdlib-only Python, fail-open). Scans agent/skill frontmatter, builds context-aware sections per persona.
-- `detect-ulw.sh`: Pattern-matches user prompts for ultrawork triggers.
-- `sanitize-hook-input.sh`: Safe stdin JSON parsing for hooks.
-- `state-read.sh` / `state-write.sh`: JSON file I/O helpers.
+All stdlib-only Python (no pip dependencies for core scripts). Each module is importable AND has a CLI entry point via `if __name__ == "__main__":`.
+
+- `hook_router.py`: Central hook dispatcher (fail-open on errors). Imports all other modules.
+- `build_sections.py`: Dynamic prompt section generator. Scans agent/skill frontmatter, builds context-aware sections per persona.
+- `detect.py`: Pattern-matches user prompts for ultrawork triggers and persona skill invocations.
+- `sanitize.py`: Safe stdin JSON parsing for hooks with sensitive field redaction.
+- `state.py`: Atomic JSON file I/O helpers (fail-open reads, locked writes).
+- `telemetry.py`: Fire-and-forget Langfuse event/score emission.
+- `prompt_version.py`: SHA256 hash computation for prompt regression detection.
+- `_debug.py`: Shared debug/logging utilities (import-only).
 
 ### Model Routing (`docs/routing.md`)
 
@@ -103,5 +108,6 @@ All Anthropic-only:
 - Agent prompts must use Claude Code tool names (`Read`, `Edit`, `Write`, `Bash`, `Grep`, `Glob`, `Task`, `WebFetch`).
 - Read-only agents use `disallowedTools: Edit, Write` and/or `permissionMode: plan`.
 - Project-local settings go in `.claude/settings.local.json`, never global user settings.
-- All shell scripts must have `#!/usr/bin/env bash`, `set -euo pipefail`, and be executable (`chmod +x`).
+- All Python scripts must have `#!/usr/bin/env python3`, be executable (`chmod +x`), and use only stdlib imports.
 - Hook router is fail-open: on any error, it logs to stderr and exits 0 (never blocks the user).
+- Python module filenames use underscores (`hook_router.py`) to enable imports.
