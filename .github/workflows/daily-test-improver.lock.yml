@@ -33,7 +33,7 @@
 name: "Daily Test Coverage Improver"
 "on":
   schedule:
-  - cron: "29 19 * * *"
+  - cron: "26 14 * * *"
     # Friendly format: daily (scattered)
   workflow_dispatch:
 

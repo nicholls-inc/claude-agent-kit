@@ -36,7 +36,7 @@
 name: "Issue Triage Agent"
 "on":
   schedule:
-  - cron: "2 23 * * 1-5"
+  - cron: "27 16 * * 1-5"
     # Friendly format: daily on weekdays (scattered)
   workflow_dispatch:
 
