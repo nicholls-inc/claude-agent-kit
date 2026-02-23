@@ -9,12 +9,10 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read
   issues: read
 
 network: defaults
-
-imports:
-  - github/gh-aw/.github/workflows/shared/reporting.md@852cb06ad52958b402ed982b69957ffc57ca0619
 
 tools:
   github:
@@ -37,9 +35,10 @@ safe-outputs:
 
 timeout-minutes: 15
 source: github/gh-aw/.github/workflows/issue-triage-agent.md@852cb06ad52958b402ed982b69957ffc57ca0619
-strict: true
 engine: claude
 ---
+
+{{#runtime-import .github/aw/imports/github/gh-aw/852cb06ad52958b402ed982b69957ffc57ca0619/.github_workflows_shared_reporting.md}}
 
 # Issue Triage Agent
 
