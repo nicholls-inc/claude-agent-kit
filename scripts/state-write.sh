@@ -44,7 +44,7 @@ fi
 # --- Atomic write: temp file + mv ---
 TEMP_FILE=""
 LOCK_DIR="${STATE_FILE}.lock"
-# shellcheck disable=SC2329 # used by trap
+# shellcheck disable=SC2317,SC2329 # used by trap
 _cleanup() {
   if [[ -d "${LOCK_DIR}" ]]; then
     rmdir "${LOCK_DIR}" 2>/dev/null || true

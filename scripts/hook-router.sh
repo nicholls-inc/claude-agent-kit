@@ -29,7 +29,7 @@ readonly STOP_MAX_BLOCKS=8
 readonly STOP_COOLDOWN_SECONDS=3
 
 # --- Fail-open trap: on ANY error, silence stdout and exit 0 ---
-# shellcheck disable=SC2329 # used by trap
+# shellcheck disable=SC2317,SC2329 # used by trap
 _fail_open() {
   local line="${1:-unknown}"
   echo "[hook-router] fail-open at line ${line}" >&2
@@ -136,7 +136,7 @@ _session_key() {
   fi
 }
 
-# shellcheck disable=SC2329 # utility for hook handlers
+# shellcheck disable=SC2317,SC2329 # utility for hook handlers
 _runtime_get() {
   local key="$1"
   local runtime_json
