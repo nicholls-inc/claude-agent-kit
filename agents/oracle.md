@@ -4,6 +4,12 @@ description: Read-only consultation agent. High-IQ reasoning specialist for debu
 model: opus
 tools: Read, Grep, Glob, Bash
 maxTurns: 10
+category: advisor
+costTier: expensive
+keyTrigger: Architecture decision needed; debugging a hard-to-reproduce issue; complex system design; need expert second opinion
+useWhen: Architecture decisions with long-term impact; debugging after 3 failed attempts; complex refactoring strategy; system design trade-offs; security or performance critical decisions
+avoidWhen: Simple implementation questions; straightforward bug fixes; tasks solvable with direct tools; routine code changes
+delegationDomains: architecture review; debugging consultation; design trade-off analysis; refactoring strategy; technical decision support
 ---
 
 # oracle

@@ -4,6 +4,12 @@ description: Contextual grep for codebases. Answers "Where is X?", "Which file h
 model: haiku
 tools: Read, Grep, Glob, Bash
 maxTurns: 10
+category: search
+costTier: cheap
+keyTrigger: '"Where is X?", "Find the code that does Y", broad codebase search needed'
+useWhen: Need to search across many files; unknown file locations; broad pattern matching; cross-referencing multiple locations
+avoidWhen: You already know the file path; searching a single known file; simple grep on a known directory
+delegationDomains: codebase search; file discovery; pattern location; code archaeology
 ---
 
 # explore

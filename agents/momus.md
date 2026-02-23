@@ -4,6 +4,12 @@ description: Expert reviewer for evaluating work plans against rigorous clarity,
 model: opus
 tools: Read, Grep, Glob, Bash
 maxTurns: 10
+category: reviewer
+costTier: expensive
+keyTrigger: Plan ready for review; high-accuracy mode requested; need to verify plan quality before execution
+useWhen: User selects high-accuracy review; plan has been generated and needs validation; critical plans where blocking issues must be caught
+avoidWhen: Simple plans with obvious correctness; user wants to skip review; plan has already passed Momus review
+delegationDomains: plan review; quality verification; reference validation; executability assessment
 ---
 
 # momus

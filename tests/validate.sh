@@ -331,6 +331,53 @@ for skill_dir in "$ROOT_DIR"/skills/*/; do
   fi
 done
 
+# ─── Agent metadata validation ───────────────────────────────────────
+
+printf '\n\033[1m=== Agent metadata validation ===\033[0m\n'
+
+VALID_CATEGORIES="persona search research advisor reviewer preplanning"
+VALID_COST_TIERS="free cheap moderate expensive"
+
+for agent_file in "$ROOT_DIR"/agents/*.md; do
+  basename="$(basename "$agent_file")"
+
+  # Validate category if present
+  category="$(get_field "$agent_file" category)"
+  if [ -n "$category" ]; then
+    if echo "$VALID_CATEGORIES" | grep -qw "$category"; then
+      pass "$basename: category '$category' is valid"
+    else
+      fail "$basename: category '$category' is not one of: $VALID_CATEGORIES"
+    fi
+  fi
+
+  # Validate costTier if present
+  cost_tier="$(get_field "$agent_file" costTier)"
+  if [ -n "$cost_tier" ]; then
+    if echo "$VALID_COST_TIERS" | grep -qw "$cost_tier"; then
+      pass "$basename: costTier '$cost_tier' is valid"
+    else
+      fail "$basename: costTier '$cost_tier' is not one of: $VALID_COST_TIERS"
+    fi
+  fi
+done
+
+# ─── Python script validation ────────────────────────────────────────
+
+printf '\n\033[1m=== Python script validation ===\033[0m\n'
+
+build_sections="$ROOT_DIR/scripts/build_sections.py"
+if [ -f "$build_sections" ]; then
+  pass "build_sections.py: file exists"
+  if python3 -m py_compile "$build_sections" 2>/dev/null; then
+    pass "build_sections.py: valid Python syntax"
+  else
+    fail "build_sections.py: Python syntax error"
+  fi
+else
+  fail "build_sections.py: file not found"
+fi
+
 # ─── Summary ──────────────────────────────────────────────────────────
 
 printf '\n\033[1m=== Summary ===\033[0m\n'

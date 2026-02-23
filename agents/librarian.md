@@ -4,6 +4,12 @@ description: Specialized codebase understanding agent for multi-repository analy
 model: sonnet
 tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
 maxTurns: 15
+category: research
+costTier: moderate
+keyTrigger: External library mentioned; need official docs; GitHub repo investigation; API reference lookup
+useWhen: User mentions unfamiliar technology; need official documentation; need to search external repos; need implementation examples from open-source
+avoidWhen: Question is about the local codebase only; answer is in local files; no external dependency involved
+delegationDomains: external documentation; open-source research; GitHub investigation; API reference; library usage patterns
 ---
 
 # librarian

@@ -19,6 +19,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_DIR
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+readonly PLUGIN_ROOT
 
 readonly DEBUG_DIR=".agent-kit/evidence/debug"
 readonly BOULDER_FILE=".agent-kit/boulder.json"
@@ -300,43 +302,14 @@ _active_persona() {
   esac
 }
 
-_persona_injection_block() {
-  local persona
-  persona="$(_active_persona)"
-  case "${persona}" in
-    hephaestus)
-      cat <<'EOF'
-Persona: hephaestus
-- Operate as a deep autonomous implementer.
-- Focus on execution depth, verification, and completion.
-- Keep orchestration simple; do not use nested delegation.
-EOF
-      ;;
-    prometheus)
-      cat <<'EOF'
-Persona: prometheus
-- Operate as planner-only unless user asks to execute.
-- Prefer markdown planning artifacts under .agent-kit/.
-- Avoid implementation edits while in planning mode.
-EOF
-      ;;
-    atlas)
-      cat <<'EOF'
-Persona: atlas
-- Operate as execution coordinator for active plans.
-- Resume from boulder state and advance one task slice at a time.
-- Enforce verification before marking tasks complete.
-EOF
-      ;;
-    *)
-      cat <<'EOF'
-Persona: sisyphus
-- Operate as orchestrator: explore, plan, execute, verify.
-- Use parallel exploration for unknown areas.
-- Deliver complete, validated outcomes.
-EOF
-      ;;
-  esac
+_build_dynamic_sections() {
+  local persona="$1"
+  if command -v python3 >/dev/null 2>&1; then
+    python3 "${SCRIPT_DIR}/build_sections.py" \
+      --persona "${persona}" \
+      --agents-dir "${PLUGIN_ROOT}/agents" \
+      --skills-dir "${PLUGIN_ROOT}/skills" 2>/dev/null || true
+  fi
 }
 
 # --- Read stdin (may be empty) ---
@@ -365,7 +338,7 @@ handle_session_start() {
   local _start_ms; _start_ms="$(_now_ms)"
   _debug "handler=SessionStart"
   local persona; persona="$(_active_persona)"
-  _persona_injection_block
+  _build_dynamic_sections "${persona}"
   local has_resume="false"
   if _boulder_active; then
     printf '\n'
@@ -382,7 +355,7 @@ handle_user_prompt_submit() {
   local _start_ms; _start_ms="$(_now_ms)"
   _debug "handler=UserPromptSubmit"
   local persona; persona="$(_active_persona)"
-  _persona_injection_block
+  _build_dynamic_sections "${persona}"
   local text="${HOOK_PROMPT:-}"
   if [[ -z "${text}" ]]; then
     text="${STDIN_JSON:-}"
