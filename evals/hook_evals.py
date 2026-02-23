@@ -17,6 +17,7 @@ import io
 import json
 import os
 import sys
+from datetime import datetime, timezone
 
 import pytest
 
@@ -242,8 +243,10 @@ class TestBoulderResume:
         boulder_file = str(tmp_path / ".agent-kit" / "boulder.json")
         ralph_file = str(tmp_path / ".agent-kit" / "ralph-loop.local.md")
 
-        # Write active boulder
-        write_json(boulder_file, boulder_cfg["boulder_json"])
+        # Write active boulder (override updatedAt so the 4-hour staleness guard never triggers)
+        boulder_data = boulder_cfg["boulder_json"].copy()
+        boulder_data["updatedAt"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        write_json(boulder_file, boulder_data)
 
         monkeypatch.setattr(hook_router, "RUNTIME_FILE", runtime_file)
         monkeypatch.setattr(hook_router, "BOULDER_FILE", boulder_file)
