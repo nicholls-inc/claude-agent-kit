@@ -355,11 +355,20 @@ handle_user_prompt_submit() {
   local _start_ms; _start_ms="$(_now_ms)"
   _debug "handler=UserPromptSubmit"
   local persona; persona="$(_active_persona)"
-  _build_dynamic_sections "${persona}"
+
+  # Detect persona skill invocation — override target persona for dynamic sections
   local text="${HOOK_PROMPT:-}"
   if [[ -z "${text}" ]]; then
     text="${STDIN_JSON:-}"
   fi
+  local target_persona
+  target_persona="$(printf '%s' "${text}" | "${SCRIPT_DIR}/detect-persona-switch.sh" 2>/dev/null)" || true
+  if [[ -n "${target_persona}" ]]; then
+    persona="${target_persona}"
+    _debug "persona_switch_detected target=${persona}"
+  fi
+
+  _build_dynamic_sections "${persona}"
   local ulw_triggered="false"
   if [[ -x "${SCRIPT_DIR}/detect-ulw.sh" ]] && printf '%s' "${text}" | "${SCRIPT_DIR}/detect-ulw.sh"; then
     _runtime_set_ulw_enabled

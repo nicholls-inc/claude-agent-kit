@@ -176,43 +176,45 @@ if [ -f "$hooks_file" ]; then
     fail "hooks.json: missing 'hooks' top-level key"
   fi
 
-  # hooks value is an array
-  if python3 -c "import json,sys; d=json.load(open('$hooks_file')); sys.exit(0 if isinstance(d.get('hooks'), list) else 1)" 2>/dev/null; then
-    pass "hooks.json: 'hooks' is an array"
+  # hooks value is a record (object keyed by event name)
+  if python3 -c "import json,sys; d=json.load(open('$hooks_file')); sys.exit(0 if isinstance(d.get('hooks'), dict) else 1)" 2>/dev/null; then
+    pass "hooks.json: 'hooks' is a record"
   else
-    fail "hooks.json: 'hooks' is not an array"
+    fail "hooks.json: 'hooks' is not a record (expected object keyed by event name)"
   fi
 
-  # Each hook entry has required fields (type, event, command)
+  # Validate structure: each event key maps to an array of matcher objects,
+  # each containing a 'hooks' array of hook definitions with 'type' and 'command'.
   python3 -c "
 import json, sys
+VALID_EVENTS = {'SessionStart', 'UserPromptSubmit', 'PreToolUse', 'Stop', 'PostToolUse', 'PostToolUseFailure', 'Notification', 'SubagentStop', 'SubagentTool', 'PermissionRequest'}
 d = json.load(open('$hooks_file'))
-hooks = d.get('hooks', [])
-errors = []
-for i, hook in enumerate(hooks):
-    for field in ['type', 'event', 'command']:
-        if field not in hook:
-            errors.append(f'hook[{i}]: missing required field \"{field}\"')
-for e in errors:
-    print(e)
-sys.exit(0)
-" 2>/dev/null | while IFS= read -r line; do
-    if [ -n "$line" ]; then
-      fail "hooks.json: $line"
-    fi
-  done
-
-  # Each hook event is a known CC hook event
-  python3 -c "
-import json, sys
-VALID_EVENTS = {'SessionStart', 'UserPromptSubmit', 'PreToolUse', 'Stop', 'PostToolUse', 'Notification', 'SubagentStop', 'SubagentTool'}
-d = json.load(open('$hooks_file'))
-for i, hook in enumerate(d.get('hooks', [])):
-    event = hook.get('event', '')
-    if event in VALID_EVENTS:
-        print(f'PASS hook[{i}]: event \"{event}\" is valid')
+hooks = d.get('hooks', {})
+for event_name, matchers in hooks.items():
+    if event_name in VALID_EVENTS:
+        print(f'PASS event \"{event_name}\" is a valid hook event')
     else:
-        print(f'FAIL hook[{i}]: event \"{event}\" is not a known CC hook event')
+        print(f'FAIL event \"{event_name}\" is not a known CC hook event')
+    if not isinstance(matchers, list):
+        print(f'FAIL event \"{event_name}\": value must be an array of matcher objects')
+        continue
+    for i, matcher in enumerate(matchers):
+        if not isinstance(matcher, dict):
+            print(f'FAIL event \"{event_name}\"[{i}]: matcher must be an object')
+            continue
+        inner_hooks = matcher.get('hooks')
+        if not isinstance(inner_hooks, list):
+            print(f'FAIL event \"{event_name}\"[{i}]: missing or invalid \"hooks\" array')
+            continue
+        for j, hook in enumerate(inner_hooks):
+            if 'type' not in hook:
+                print(f'FAIL event \"{event_name}\"[{i}].hooks[{j}]: missing \"type\"')
+            else:
+                print(f'PASS event \"{event_name}\"[{i}].hooks[{j}]: has \"type\"')
+            if hook.get('type') == 'command' and 'command' not in hook:
+                print(f'FAIL event \"{event_name}\"[{i}].hooks[{j}]: type is \"command\" but missing \"command\" field')
+            elif hook.get('type') == 'command':
+                print(f'PASS event \"{event_name}\"[{i}].hooks[{j}]: has \"command\"')
 " 2>/dev/null | while IFS= read -r line; do
     if echo "$line" | grep -q '^PASS'; then
       msg="$(echo "$line" | sed 's/^PASS //')"
@@ -227,18 +229,27 @@ for i, hook in enumerate(d.get('hooks', [])):
   commands=$(python3 -c "
 import json, re
 d = json.load(open('$hooks_file'))
-for hook in d.get('hooks', []):
-    cmd = hook.get('command', '')
-    # Resolve \${CLAUDE_PLUGIN_ROOT} to the repo root for validation
-    cmd = re.sub(r'\\\$\{CLAUDE_PLUGIN_ROOT\}', '.', cmd)
-    if cmd:
-        print(cmd)
+for event_name, matchers in d.get('hooks', {}).items():
+    for matcher in matchers:
+        for hook in matcher.get('hooks', []):
+            cmd = hook.get('command', '')
+            cmd = re.sub(r'\\\$\{CLAUDE_PLUGIN_ROOT\}', '.', cmd)
+            if cmd:
+                print(cmd)
 " 2>/dev/null || true)
 
+  # Deduplicate commands (same script may appear under multiple events)
+  seen_commands=""
   for cmd_path in $commands; do
     resolved="$ROOT_DIR/${cmd_path#./}"
+    basename_cmd="$(basename "$resolved")"
+    if echo "$seen_commands" | grep -qx "$basename_cmd"; then
+      continue
+    fi
+    seen_commands="$seen_commands
+$basename_cmd"
     if [ -f "$resolved" ]; then
-      pass "hooks.json: command script '$(basename "$resolved")' exists"
+      pass "hooks.json: command script '$basename_cmd' exists"
     else
       fail "hooks.json: command script '$cmd_path' not found"
     fi
@@ -376,6 +387,57 @@ if [ -f "$build_sections" ]; then
   fi
 else
   fail "build_sections.py: file not found"
+fi
+
+# ─── Persona switch detection ─────────────────────────────────────────
+
+printf '\n\033[1m=== Persona switch detection (detect-persona-switch.sh) ===\033[0m\n'
+
+detect_script="$ROOT_DIR/scripts/detect-persona-switch.sh"
+
+if [ -x "$detect_script" ]; then
+  pass "detect-persona-switch.sh: is executable"
+
+  # Positive: detects each persona skill invocation
+  for persona in sisyphus hephaestus atlas prometheus; do
+    result="$(echo "/claude-agent-kit:${persona}" | "$detect_script" 2>/dev/null)" || true
+    if [ "$result" = "$persona" ]; then
+      pass "detect-persona-switch.sh: detects /claude-agent-kit:${persona}"
+    else
+      fail "detect-persona-switch.sh: expected '${persona}', got '${result}' for /claude-agent-kit:${persona}"
+    fi
+  done
+
+  # Positive: detects without leading slash
+  result="$(echo "claude-agent-kit:sisyphus" | "$detect_script" 2>/dev/null)" || true
+  if [ "$result" = "sisyphus" ]; then
+    pass "detect-persona-switch.sh: detects without leading slash"
+  else
+    fail "detect-persona-switch.sh: failed without leading slash, got '${result}'"
+  fi
+
+  # Negative: rejects non-persona skills
+  if echo "/claude-agent-kit:plan" | "$detect_script" >/dev/null 2>&1; then
+    fail "detect-persona-switch.sh: should reject /claude-agent-kit:plan"
+  else
+    pass "detect-persona-switch.sh: rejects /claude-agent-kit:plan"
+  fi
+
+  # Negative: rejects plain text containing persona names
+  if echo "switch to sisyphus mode" | "$detect_script" >/dev/null 2>&1; then
+    fail "detect-persona-switch.sh: should reject plain text 'switch to sisyphus mode'"
+  else
+    pass "detect-persona-switch.sh: rejects plain text with persona name"
+  fi
+
+  # Negative: rejects empty input
+  if echo "" | "$detect_script" >/dev/null 2>&1; then
+    fail "detect-persona-switch.sh: should reject empty input"
+  else
+    pass "detect-persona-switch.sh: rejects empty input"
+  fi
+else
+  fail "detect-persona-switch.sh: not found or not executable"
 fi
 
 # ─── Summary ──────────────────────────────────────────────────────────

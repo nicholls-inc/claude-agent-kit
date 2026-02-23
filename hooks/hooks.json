@@ -1,24 +1,44 @@
 {
-  "hooks": [
-    {
-      "type": "command",
-      "event": "SessionStart",
-      "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.sh"
-    },
-    {
-      "type": "command",
-      "event": "UserPromptSubmit",
-      "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.sh"
-    },
-    {
-      "type": "command",
-      "event": "PreToolUse",
-      "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.sh"
-    },
-    {
-      "type": "command",
-      "event": "Stop",
-      "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.sh"
-    }
-  ]
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.sh"
+          }
+        ]
+      }
+    ]
+  }
 }
