@@ -17,8 +17,7 @@ from pathlib import Path
 try:
     from langfuse import Langfuse
 except ImportError:
-    print("ERROR: langfuse package required. Run via: uv run evals/baseline-comparison.py", file=sys.stderr)
-    sys.exit(1)
+    Langfuse = None
 
 
 REPORT_DIR = Path(__file__).parent / "reports"
@@ -157,6 +156,10 @@ def generate_report(pairs: dict, langfuse: "Langfuse") -> str:
 
 
 def main():
+    if Langfuse is None:
+        print("ERROR: langfuse package required. Run via: uv run evals/baseline-comparison.py", file=sys.stderr)
+        sys.exit(1)
+
     parser = argparse.ArgumentParser(description="Plugin vs vanilla baseline comparison")
     parser.add_argument("--days", type=int, default=30, help="Look back N days for traces")
     parser.add_argument("--output", help="Output file path for report")

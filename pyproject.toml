@@ -8,3 +8,6 @@ dependencies = [
     "anthropic>=0.40.0",
     "pytest>=8.0.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -4,6 +4,12 @@ description: Pre-planning consultant that analyzes requests to identify hidden i
 model: opus
 tools: Read, Grep, Glob, Bash
 maxTurns: 10
+category: preplanning
+costTier: expensive
+keyTrigger: About to generate a work plan; complex request needs pre-analysis; need to surface hidden requirements
+useWhen: Before generating any non-trivial plan; complex or ambiguous user requests; need to identify scope creep risks; architecture-level decisions pending
+avoidWhen: Simple single-file tasks; plan already reviewed; user request is unambiguous and well-scoped
+delegationDomains: pre-plan analysis; requirement discovery; ambiguity detection; scope validation; risk identification
 ---
 
 # metis
