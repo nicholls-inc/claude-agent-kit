@@ -1,0 +1,20 @@
+{
+  "description": "ULW detection test cases for detect-ulw.sh",
+  "cases": [
+    { "input": "ulw", "expect_match": true, "note": "bare keyword" },
+    { "input": "ultrawork", "expect_match": true, "note": "bare keyword" },
+    { "input": "please use ulw mode", "expect_match": true, "note": "embedded in sentence" },
+    { "input": "enable ultrawork", "expect_match": true, "note": "embedded in sentence" },
+    { "input": "ULW", "expect_match": true, "note": "uppercase" },
+    { "input": "ULTRAWORK", "expect_match": true, "note": "uppercase" },
+    { "input": "Ulw please", "expect_match": true, "note": "mixed case" },
+    { "input": "let's go ulw!", "expect_match": true, "note": "with punctuation" },
+    { "input": "use ulw\nnow", "expect_match": true, "note": "with newline" },
+    { "input": "bulwark", "expect_match": false, "note": "false positive: contains ulw" },
+    { "input": "skulwark", "expect_match": false, "note": "false positive: contains ulw" },
+    { "input": "result", "expect_match": false, "note": "no match" },
+    { "input": "hello world", "expect_match": false, "note": "no match" },
+    { "input": "", "expect_match": false, "note": "empty string" },
+    { "input": "ultra work", "expect_match": false, "note": "separated words, not keyword" }
+  ]
+}

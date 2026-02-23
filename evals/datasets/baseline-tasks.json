@@ -1,0 +1,101 @@
+{
+  "description": "Task definitions for vanilla vs plugin baseline comparison",
+  "tasks": [
+    {
+      "id": "bug-fix-simple",
+      "name": "Simple Bug Fix",
+      "description": "Fix a null check in a utility function that causes a crash on empty input",
+      "category": "bug-fix",
+      "expected_personas": ["hephaestus"],
+      "complexity": "low"
+    },
+    {
+      "id": "multi-file-feature",
+      "name": "Multi-file Feature Addition",
+      "description": "Add a new validation middleware that checks request headers and returns appropriate error responses, touching route handlers, middleware chain, and tests",
+      "category": "feature",
+      "expected_personas": ["sisyphus"],
+      "complexity": "medium"
+    },
+    {
+      "id": "planning-task",
+      "name": "Architecture Planning",
+      "description": "Design an implementation plan for adding real-time notifications to an existing REST API",
+      "category": "planning",
+      "expected_personas": ["prometheus"],
+      "complexity": "medium"
+    },
+    {
+      "id": "code-exploration",
+      "name": "Codebase Exploration",
+      "description": "Find all API endpoints that handle file uploads and document their authentication requirements",
+      "category": "exploration",
+      "expected_personas": ["sisyphus"],
+      "complexity": "low"
+    },
+    {
+      "id": "plan-execution",
+      "name": "Plan-driven Execution",
+      "description": "Execute tasks 3-5 from an existing implementation plan, including running verification after each task",
+      "category": "execution",
+      "expected_personas": ["atlas"],
+      "complexity": "medium"
+    },
+    {
+      "id": "architecture-question",
+      "name": "Architecture Decision",
+      "description": "Should we use WebSockets or Server-Sent Events for the live dashboard feature? Evaluate trade-offs given our existing infrastructure",
+      "category": "architecture",
+      "expected_personas": ["sisyphus"],
+      "complexity": "low"
+    },
+    {
+      "id": "refactor-large",
+      "name": "Large Refactor",
+      "description": "Refactor the authentication module from callback-based to async/await, updating all callers",
+      "category": "refactor",
+      "expected_personas": ["hephaestus"],
+      "complexity": "high"
+    },
+    {
+      "id": "test-generation",
+      "name": "Test Generation",
+      "description": "Write comprehensive unit tests for the payment processing module, covering success, failure, and edge cases",
+      "category": "testing",
+      "expected_personas": ["hephaestus"],
+      "complexity": "medium"
+    },
+    {
+      "id": "documentation",
+      "name": "API Documentation",
+      "description": "Generate OpenAPI/Swagger documentation for all REST endpoints in the user management service",
+      "category": "documentation",
+      "expected_personas": ["sisyphus"],
+      "complexity": "low"
+    },
+    {
+      "id": "performance-investigation",
+      "name": "Performance Investigation",
+      "description": "Investigate why the search endpoint is slow (>2s response time) and propose specific optimizations",
+      "category": "investigation",
+      "expected_personas": ["sisyphus"],
+      "complexity": "medium"
+    },
+    {
+      "id": "multi-step-workflow",
+      "name": "End-to-end Workflow",
+      "description": "Plan and implement a CSV export feature: add the API endpoint, create the CSV generator, add tests, update documentation",
+      "category": "workflow",
+      "expected_personas": ["sisyphus", "atlas"],
+      "complexity": "high"
+    },
+    {
+      "id": "config-change",
+      "name": "Configuration Change",
+      "description": "Add rate limiting configuration to the API gateway with per-endpoint limits and a global default",
+      "category": "config",
+      "expected_personas": ["hephaestus"],
+      "complexity": "low"
+    }
+  ]
+}

@@ -176,21 +176,50 @@ if [ -f "$hooks_file" ]; then
     fail "hooks.json: missing 'hooks' top-level key"
   fi
 
-  # Hook matchers reference existing agents
-  matchers=$(python3 -c "
-import json
-d = json.load(open('$hooks_file'))
-for event in d.get('hooks', {}):
-    for entry in d['hooks'][event]:
-        if 'matcher' in entry:
-            print(entry['matcher'])
-" 2>/dev/null || true)
+  # hooks value is an array
+  if python3 -c "import json,sys; d=json.load(open('$hooks_file')); sys.exit(0 if isinstance(d.get('hooks'), list) else 1)" 2>/dev/null; then
+    pass "hooks.json: 'hooks' is an array"
+  else
+    fail "hooks.json: 'hooks' is not an array"
+  fi
 
-  for matcher in $matchers; do
-    if [ -f "$ROOT_DIR/agents/${matcher}.md" ]; then
-      pass "hooks.json: matcher '$matcher' -> agents/${matcher}.md exists"
-    else
-      fail "hooks.json: matcher '$matcher' -> agents/${matcher}.md not found"
+  # Each hook entry has required fields (type, event, command)
+  python3 -c "
+import json, sys
+d = json.load(open('$hooks_file'))
+hooks = d.get('hooks', [])
+errors = []
+for i, hook in enumerate(hooks):
+    for field in ['type', 'event', 'command']:
+        if field not in hook:
+            errors.append(f'hook[{i}]: missing required field \"{field}\"')
+for e in errors:
+    print(e)
+sys.exit(0)
+" 2>/dev/null | while IFS= read -r line; do
+    if [ -n "$line" ]; then
+      fail "hooks.json: $line"
+    fi
+  done
+
+  # Each hook event is a known CC hook event
+  python3 -c "
+import json, sys
+VALID_EVENTS = {'SessionStart', 'UserPromptSubmit', 'PreToolUse', 'Stop', 'PostToolUse', 'Notification', 'SubagentStop', 'SubagentTool'}
+d = json.load(open('$hooks_file'))
+for i, hook in enumerate(d.get('hooks', [])):
+    event = hook.get('event', '')
+    if event in VALID_EVENTS:
+        print(f'PASS hook[{i}]: event \"{event}\" is valid')
+    else:
+        print(f'FAIL hook[{i}]: event \"{event}\" is not a known CC hook event')
+" 2>/dev/null | while IFS= read -r line; do
+    if echo "$line" | grep -q '^PASS'; then
+      msg="$(echo "$line" | sed 's/^PASS //')"
+      pass "hooks.json: $msg"
+    elif echo "$line" | grep -q '^FAIL'; then
+      msg="$(echo "$line" | sed 's/^FAIL //')"
+      fail "hooks.json: $msg"
     fi
   done
 
@@ -198,14 +227,12 @@ for event in d.get('hooks', {}):
   commands=$(python3 -c "
 import json, re
 d = json.load(open('$hooks_file'))
-for event in d.get('hooks', {}):
-    for entry in d['hooks'][event]:
-        for hook in entry.get('hooks', []):
-            cmd = hook.get('command', '')
-            # Resolve \${CLAUDE_PLUGIN_ROOT} to the repo root for validation
-            cmd = re.sub(r'\\\$\{CLAUDE_PLUGIN_ROOT\}', '.', cmd)
-            if cmd:
-                print(cmd)
+for hook in d.get('hooks', []):
+    cmd = hook.get('command', '')
+    # Resolve \${CLAUDE_PLUGIN_ROOT} to the repo root for validation
+    cmd = re.sub(r'\\\$\{CLAUDE_PLUGIN_ROOT\}', '.', cmd)
+    if cmd:
+        print(cmd)
 " 2>/dev/null || true)
 
   for cmd_path in $commands; do
@@ -220,41 +247,47 @@ else
   fail "hooks.json: file not found"
 fi
 
-# ─── Safe gate script ─────────────────────────────────────────────────
+# ─── Shell scripts validation ────────────────────────────────────────
 
-printf '\n\033[1m=== Safe gate script (scripts/safe-gate.sh) ===\033[0m\n'
+printf '\n\033[1m=== Shell scripts (scripts/*.sh) ===\033[0m\n'
 
-gate_script="$ROOT_DIR/scripts/safe-gate.sh"
+for script_file in "$ROOT_DIR"/scripts/*.sh; do
+  [ -f "$script_file" ] || continue
+  basename="$(basename "$script_file")"
 
-if [ -f "$gate_script" ]; then
   # Is executable
-  if [ -x "$gate_script" ]; then
-    pass "safe-gate.sh: is executable"
+  if [ -x "$script_file" ]; then
+    pass "$basename: is executable"
   else
-    fail "safe-gate.sh: is not executable"
+    fail "$basename: is not executable"
   fi
 
   # Has shebang
-  first_line="$(head -1 "$gate_script")"
+  first_line="$(head -1 "$script_file")"
   if [ "$first_line" = "#!/usr/bin/env bash" ]; then
-    pass "safe-gate.sh: has correct shebang"
+    pass "$basename: has correct shebang"
   else
-    fail "safe-gate.sh: shebang is '$first_line', expected '#!/usr/bin/env bash'"
+    fail "$basename: shebang is '$first_line', expected '#!/usr/bin/env bash'"
+  fi
+
+  # Passes bash -n syntax check
+  if bash -n "$script_file" 2>/dev/null; then
+    pass "$basename: bash -n syntax check passes"
+  else
+    fail "$basename: bash -n syntax check fails"
   fi
 
   # ShellCheck
   if command -v shellcheck > /dev/null 2>&1; then
-    if shellcheck "$gate_script" > /dev/null 2>&1; then
-      pass "safe-gate.sh: shellcheck passes"
+    if shellcheck "$script_file" > /dev/null 2>&1; then
+      pass "$basename: shellcheck passes"
     else
-      fail "safe-gate.sh: shellcheck reports issues"
+      fail "$basename: shellcheck reports issues"
     fi
   else
-    warn "safe-gate.sh: shellcheck not installed, skipping"
+    warn "$basename: shellcheck not installed, skipping"
   fi
-else
-  fail "safe-gate.sh: file not found"
-fi
+done
 
 # ─── Cross-reference integrity ────────────────────────────────────────
 

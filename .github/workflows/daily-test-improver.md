@@ -58,23 +58,27 @@ This is a **pure-markdown Claude Code plugin** — a CLI plugin for Claude Code 
 - `agents/*.md` — Agent definitions (YAML frontmatter + markdown system prompt)
 - `skills/*/SKILL.md` — Skill definitions (YAML frontmatter + prompt template)
 - `hooks/hooks.json` — Hook configuration (JSON)
-- `scripts/safe-gate.sh` — Shell script (the only executable file)
+- `scripts/` — Shell scripts: `hook-router.sh` (main hook dispatcher), `state-read.sh`, `state-write.sh`, `sanitize-hook-input.sh`, `detect-ulw.sh`
+- `tests/validate.sh` — Structural validation suite (the main test entry point)
 - `docs/` — Documentation markdown files
+- `design/` — Design and architecture documents
 
 ### What "testing" means for this repo
 
-Traditional code coverage (line/branch/function) does **not** apply. Instead, "testing" means **structural and schema validation**:
+Traditional code coverage (line/branch/function) does **not** apply. Instead, "testing" means **structural and schema validation**.
 
-- **Shell script linting**: `shellcheck scripts/safe-gate.sh`
+The main test entry point is `./tests/validate.sh`, which already validates:
+
+- **Shell script linting**: `shellcheck` on all `scripts/*.sh`
 - **YAML frontmatter validation**: each `agents/*.md` and `skills/*/SKILL.md` must have valid YAML frontmatter with required fields
   - Agents require: `name`, `description`, `model`, `tools`, `maxTurns`
   - Skills require: `name`, `description`
   - Model names must match the routing policy in `docs/routing.md`
 - **JSON validation**: `hooks/hooks.json` must be valid JSON and conform to expected schema
-- **Cross-reference integrity**: agents referenced in `docs/agent-mapping.md` must exist in `agents/`; skills listed in docs must exist in `skills/`
+- **Cross-reference integrity**: agents referenced in `docs/agent-mapping.md` must exist in `agents/`; skills in `skills/*/` must have `SKILL.md`
 - **Frontmatter field completeness**: required fields present, no unknown fields
 
-"Coverage" is measured as: what percentage of files/fields are validated, and whether all validations are passing.
+"Coverage" is measured as: what percentage of files/fields are validated, and whether all validations are passing. Focus your work on gaps **not yet covered** by `tests/validate.sh`.
 
 **Scope**: Only test files outside of `.github/`. Do not validate workflow definitions or CI configuration.
 
@@ -146,12 +150,13 @@ To decide which phase to perform:
 
    f. If the plan needs updating, comment on the planning discussion with a revised plan and rationale. Consider maintainer feedback.
 
-   g. Based on all of the above, select a specific validation gap to address. Examples:
-      - Add a script to validate required frontmatter fields in `agents/*.md`
-      - Add `shellcheck` enforcement for `scripts/*.sh`
-      - Add JSON schema validation for `hooks/hooks.json`
-      - Add cross-reference checks (agents in docs exist on disk)
-      - Add frontmatter validation for `skills/*/SKILL.md`
+   g. Based on all of the above, select a specific validation gap to address. Examples of gaps NOT yet covered by `tests/validate.sh`:
+      - Validate that `skills/*/SKILL.md` files with `context: fork` have an `agent:` field pointing to an existing agent
+      - Validate that all `scripts/*.sh` use `set -euo pipefail` as safety defaults
+      - Validate that model values in agent frontmatter are consistent with the allowed set in `docs/routing.md`
+      - Validate that `hooks/hooks.json` hook commands reference scripts that actually exist
+      - Validate that `STATE.md` conforms to expected structure (if format is documented)
+      - Add snapshot/regression checks: run `tests/validate.sh` and assert it exits 0
 
 2. **Work towards your selected goal**.
 

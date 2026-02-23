@@ -1,0 +1,22 @@
+{
+  "trace_id": "hephaestus-bad-001",
+  "description": "Hephaestus did random debugging, stopped early, no verification",
+  "expected_scores": {
+    "hephaestus.execution_depth": 2,
+    "hephaestus.verification_depth": 0,
+    "hephaestus.retry_quality": 1,
+    "hephaestus.no_nested_orchestration": 1,
+    "hephaestus.persistence": 0
+  },
+  "metadata": {
+    "persona": "hephaestus"
+  },
+  "messages": [
+    { "user": "Refactor the payment module from callbacks to async/await", "timestamp": "2026-02-22T10:00:00Z" },
+    { "assistant": "Let me try updating the payment module.", "timestamp": "2026-02-22T10:00:05Z" }
+  ],
+  "tool_calls": [
+    { "name": "Edit", "input": "src/payments/processor.ts", "output": "Changed one function to async", "timestamp": "2026-02-22T10:00:10Z" },
+    { "name": "Edit", "input": "src/payments/processor.ts", "output": "Changed another function", "timestamp": "2026-02-22T10:00:15Z" }
+  ]
+}

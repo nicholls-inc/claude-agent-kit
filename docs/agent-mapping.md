@@ -1,54 +1,48 @@
-# Agent mapping: oh-my-opencode -> Claude Code
+# Agent Mapping
 
-This document maps each agent defined in `src/agents/` in this repository to its Claude Code plugin equivalent.
-
-## What is 1:1 here?
-
-"1:1" means we preserve:
-- role/purpose
-- tool restrictions
-- output structure
-- cost intent (cheap vs expensive)
-
-but we must adapt:
-- OpenCode-only tools (e.g. `call_omo_agent`, `todowrite`)
-- OpenCode-only lifecycle behaviors (some continuation/coordination hooks)
+This document maps each agent in the plugin to its role, model, and namespace.
 
 ## Inventory
 
-Source of truth: `src/agents/AGENTS.md`
+### Persona agents (main-session injection)
 
-| Agent | Category | Intended cost | Claude Code equivalent |
+These agents define persona behavior injected into the main Claude Code session via hooks.
+
+| Agent | Category | Model | Claude Code equivalent |
 |---|---|---|---|
-| Sisyphus | orchestrator | expensive | `claude-agent-kit:sisyphus` |
-| Hephaestus | executor/autonomous | expensive | `claude-agent-kit:hephaestus` |
-| Oracle | advisor | expensive | `claude-agent-kit:oracle` |
-| Librarian | external research | cheap | `claude-agent-kit:librarian` |
-| Explore | code search | free | `claude-agent-kit:explore` |
-| Multimodal-Looker | vision/PDF | cheap | `claude-agent-kit:multimodal-looker` |
-| Metis | pre-planning | expensive | `claude-agent-kit:metis` |
-| Momus | plan review | expensive | `claude-agent-kit:momus` |
-| Atlas | task/todo orchestration | expensive | `claude-agent-kit:atlas` |
-| Prometheus | planning | expensive | `claude-agent-kit:prometheus` |
-| Sisyphus-Junior | focused executor | medium | `claude-agent-kit:sisyphus-junior` |
+| Sisyphus | orchestrator | opus | `claude-agent-kit:sisyphus` |
+| Hephaestus | executor/autonomous | opus | `claude-agent-kit:hephaestus` |
+| Atlas | execution coordinator | sonnet | `claude-agent-kit:atlas` |
+| Prometheus | planning | opus | `claude-agent-kit:prometheus` |
 
-Additional (not in the original 11-agent roster):
+### Subagents (forked specialist workers)
 
-| Agent | Category | Intended cost | Claude Code equivalent |
+These agents run as forked subagents via `Task()` or `context: fork` skills.
+
+| Agent | Category | Model | Claude Code equivalent |
 |---|---|---|---|
-| Boulder | bounded finisher | medium | `claude-agent-kit:boulder` |
+| Explore | code search | haiku | `claude-agent-kit:explore` |
+| Librarian | external research | sonnet | `claude-agent-kit:librarian` |
+| Oracle | advisor | opus | `claude-agent-kit:oracle` |
+| Metis | pre-planning | opus | `claude-agent-kit:metis` |
+| Momus | plan review | opus | `claude-agent-kit:momus` |
+
+### Agents not yet ported
+
+| Agent | Category | Original cost | Notes |
+|---|---|---|---|
+| Multimodal-Looker | vision/PDF | cheap | Pending multimodal support |
 
 ## Tool surface translation
 
-| oh-my-opencode reference | Claude Code equivalent |
+| Reference | Claude Code equivalent |
 |---|---|
-| `call_omo_agent(subagent_type="explore"|"librarian"|...)` | `Task(<agent-name>)` (only available when running a main-thread agent) or `context: fork` skills |
-| `todowrite` / task/todo enforcement | Claude Code tasks (agent teams) or explicit checklists; optional hooks for gates |
-| OpenCode-specific tools | Replace with Claude Code tools: `Read`, `Edit`, `Write`, `Bash`, `Glob`, `Grep`, plus MCP tools |
+| `Task(<agent-name>)` | Fork a specialist subagent via `context: fork` skills |
+| Task/todo enforcement | Claude Code tasks (agent teams) or explicit checklists; optional hooks for gates |
+| External tools | Replace with Claude Code tools: `Read`, `Edit`, `Write`, `Bash`, `Glob`, `Grep`, plus MCP tools |
 
 ## Prompt suitability notes
 
 Common changes required when porting prompts:
-- Remove references to OpenCode-only tools and replace with Claude Code tool names.
-- Remove OpenCode-specific file editing constraints (e.g., apply_patch semantics) and keep the behavioral intent.
+- Use Claude Code tool names in all agent prompts.
 - Replace background-task manager language with Claude Code subagent behavior (foreground/background limitations).

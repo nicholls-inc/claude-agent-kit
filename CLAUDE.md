@@ -1,10 +1,10 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with code in this repository.
 
 ## What This Is
 
-A Claude Code plugin that ports the oh-my-opencode multi-agent roster to Anthropic-only models. It is a pure-markdown plugin — no build step, no dependencies, no compiled code. All agents, skills, hooks, and docs are plain `.md` or `.json` files.
+A multi-agent orchestration plugin for Claude Code. Provides persona-based workflows, planning and execution pipelines, specialist subagents, and continuation control. Pure-markdown plugin — no build step, no dependencies, no compiled code. All agents, skills, hooks, and docs are plain `.md` or `.json` files.
 
 ## Running Locally
 
@@ -12,74 +12,81 @@ A Claude Code plugin that ports the oh-my-opencode multi-agent roster to Anthrop
 claude --plugin-dir ./claude-agent-kit --debug
 ```
 
-## Architecture
-
-### Agents (`agents/*.md`)
-
-Each file is a self-contained agent definition with YAML frontmatter (`name`, `model`, `tools`, `permissionMode`, `maxTurns`) and a markdown system prompt body. Agents are namespaced as `claude-agent-kit:<agent-name>`.
-
-Key roles:
-- **sisyphus** (opus): Top-level orchestrator — plans, delegates to specialists, verifies.
-- **hephaestus** (opus): Autonomous executor — "just get it done" with verification.
-- **boulder** (sonnet): Bounded one-shot finisher — loops plan/implement/verify up to 5 iterations with a SubagentStop hook enforcing a Safe gate (lint+test+build).
-- **oracle** (opus, read-only): Architecture advisor and self-review. Called when stuck or after significant changes.
-- **explore** (haiku, read-only): Fast file discovery and codebase search.
-- **librarian** (sonnet, read-only): External docs and real-world examples.
-
-### Skills (`skills/*/SKILL.md`)
-
-Each subdirectory contains a `SKILL.md` with YAML frontmatter (`name`, `model`, `context`, `agent`, `allowed-tools`, `disable-model-invocation`) and a prompt template. Skills are namespaced as `/claude-agent-kit:<skill-name>`.
-
-Two categories:
-- **Workflow skills** (`explore`, `plan`, `implement`, `review`, `boulder`): Composable steps — explore the codebase, plan a change, implement it, review it, or do all three in a bounded loop.
-- **Agent entrypoint skills**: Thin wrappers that fork into a named agent (e.g., `skills/boulder/SKILL.md` has `context: fork` + `agent: boulder`).
-- **Management skills** (`configure`, `team-templates`): Setup helpers, not auto-invoked (`disable-model-invocation: true`).
-
-### Hooks (`hooks/hooks.json`)
-
-Plugin hook definitions. Currently one hook:
-- **SubagentStop** on `boulder`: runs `scripts/safe-gate.sh` before the boulder agent can stop. Exit code 2 blocks the stop, forcing boulder to fix failures.
-
-### Safe Gate (`scripts/safe-gate.sh`)
-
-The lint/test/build gate enforced on boulder. Command discovery priority:
-1. `CLAUDE_AGENT_KIT_SAFE_GATE_COMMANDS` env var (semicolon-separated)
-2. `claude-agent-kit.safe-gate.json` config file (`{ "commands": [...] }`)
-3. Auto-detect from `package.json` scripts (`lint`, `test`, `build`) using the detected package manager
-
-Requires at least 3 commands. Must be executable (`chmod +x`).
-
-### Model Routing (`docs/routing.md`)
-
-All models are Anthropic-only. The mapping:
-- **haiku**: high-volume search/exploration (Explore agent)
-- **sonnet**: implementation, day-to-day work, cost-sensitive execution (Boulder, Atlas, Sisyphus-Junior)
-- **opus / opusplan**: architecture, deep review, planning (Sisyphus, Oracle, Metis, Momus, Prometheus)
-
-## Adding a New Agent
-
-1. Create `agents/<name>.md` with required frontmatter: `name`, `description`, `model`, `tools`, `maxTurns`.
-2. Optionally create `skills/<name>/SKILL.md` as an entrypoint (use `context: fork` + `agent: <name>` to run in a forked subagent).
-3. Add to `docs/agent-mapping.md` inventory table.
-4. Follow the model routing policy in `docs/routing.md` for model selection.
-
-## Adding a New Skill
-
-1. Create `skills/<name>/SKILL.md` with required frontmatter: `name`, `description`.
-2. Use `$ARGUMENTS` in the prompt body for user input.
-3. Set `disable-model-invocation: true` for skills that should only be manually invoked.
-
 ## Testing
 
 ```bash
 ./tests/validate.sh
 ```
 
-Validates plugin structural contracts: agent/skill frontmatter (required fields, valid model values, cross-references), `hooks.json` schema, `safe-gate.sh` correctness, and bidirectional consistency between `agents/*.md` and `docs/agent-mapping.md`. Exits 0 on success, 1 on any failure. Also runs in CI via `.github/workflows/validate.yml`.
+Validates: agent/skill frontmatter, `hooks.json` schema, shell script correctness, and bidirectional consistency between `agents/*.md` and `docs/agent-mapping.md`. Exits 0 on success, 1 on failure. Runs in CI via `.github/workflows/validate.yml`.
+
+## Architecture
+
+### Agents (`agents/*.md`)
+
+Each file has YAML frontmatter (`name`, `description`, `model`, `tools`, `maxTurns`) and a markdown system prompt body. Namespaced as `claude-agent-kit:<agent-name>`.
+
+Two categories:
+- **Persona agents** (main-session injection via hooks): `sisyphus` (opus, orchestrator), `hephaestus` (opus, autonomous executor), `atlas` (sonnet, execution coordinator), `prometheus` (opus, planner).
+- **Subagents** (forked specialists): `explore` (haiku, code search), `librarian` (sonnet, external research), `oracle` (opus, architecture advisor), `metis` (opus, pre-planning), `momus` (opus, plan review).
+
+### Skills (`skills/*/SKILL.md`)
+
+Each has YAML frontmatter (`name`, `description`) and a prompt template. Namespaced as `/claude-agent-kit:<skill-name>`. Use `$ARGUMENTS` for user input.
+
+Categories:
+- **Persona switches** (`sisyphus`, `hephaestus`, `atlas`, `prometheus`): Set `activePersona` in runtime state.
+- **Workflow** (`plan`, `start-work`): Create plans under `.agent-kit/plans/` and execute from boulder state.
+- **Continuation control** (`ulw`, `ralph-loop`, `stop-continuation`, `cancel-ralph`): Manage autonomous execution loops.
+- **Utilities** (`handoff`, `selftest`): Context transfer and self-testing.
+
+### Hooks (`hooks/hooks.json`)
+
+Four hooks, all dispatched through `scripts/hook-router.sh`:
+- **SessionStart**: Injects active persona prompt + boulder resume context.
+- **UserPromptSubmit**: Injects persona prompt + detects ultrawork (ULW) triggers.
+- **PreToolUse**: Blocks destructive Bash commands; blocks code edits in `prometheus` persona.
+- **Stop**: Blocks agent stop when boulder/ralph/ULW continuation is active (up to 8 blocks, then auto-disables).
+
+### State Management (`.agent-kit/`)
+
+Runtime state files (gitignored, not part of the plugin itself):
+- `boulder.json`: Active plan tracking (`active`, `status`, `planPath`, `currentTask`).
+- `plans/*.md`: Markdown checklists created by `/claude-agent-kit:plan`.
+- `state/runtime.local.json`: Session state (`activePersona`, ULW flags, stop counters).
+- `ralph-loop.local.md`: Iteration-bounded continuation loop state.
+
+### Scripts (`scripts/`)
+
+- `hook-router.sh`: Central hook dispatcher (fail-open on errors).
+- `detect-ulw.sh`: Pattern-matches user prompts for ultrawork triggers.
+- `sanitize-hook-input.sh`: Safe stdin JSON parsing for hooks.
+- `state-read.sh` / `state-write.sh`: JSON file I/O helpers.
+
+### Model Routing (`docs/routing.md`)
+
+All Anthropic-only:
+- **haiku**: high-volume search/exploration (explore)
+- **sonnet**: implementation, coordination (atlas, librarian)
+- **opus**: architecture, planning, deep review (sisyphus, hephaestus, prometheus, oracle, metis, momus)
+
+## Adding a New Agent
+
+1. Create `agents/<name>.md` with required frontmatter: `name`, `description`, `model`, `tools`, `maxTurns`.
+2. Add to `docs/agent-mapping.md` inventory table.
+3. Follow model routing policy in `docs/routing.md`.
+4. Optionally create a matching `skills/<name>/SKILL.md` entrypoint.
+
+## Adding a New Skill
+
+1. Create `skills/<name>/SKILL.md` with required frontmatter: `name`, `description`.
+2. Use `$ARGUMENTS` in the prompt body for user input.
+3. Optional frontmatter keys: `model`, `context` (e.g. `fork` to run in a forked subagent), `agent` (paired with `context: fork`), `allowed-tools`, `disable-model-invocation` (set `true` for manual-only skills).
 
 ## Key Conventions
 
-- Agent prompts should not reference OpenCode-specific tools — use Claude Code tool names (`Read`, `Edit`, `Write`, `Bash`, `Grep`, `Glob`, `Task`, `WebFetch`).
+- Agent prompts must use Claude Code tool names (`Read`, `Edit`, `Write`, `Bash`, `Grep`, `Glob`, `Task`, `WebFetch`).
 - Read-only agents use `disallowedTools: Edit, Write` and/or `permissionMode: plan`.
-- The `context: fork` skill frontmatter key runs the skill in a forked subagent context rather than the main thread.
 - Project-local settings go in `.claude/settings.local.json`, never global user settings.
+- All shell scripts must have `#!/usr/bin/env bash`, `set -euo pipefail`, and be executable (`chmod +x`).
+- Hook router is fail-open: on any error, it logs to stderr and exits 0 (never blocks the user).

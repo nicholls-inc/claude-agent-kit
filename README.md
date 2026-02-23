@@ -1,92 +1,48 @@
-# claude-agent-kit
+# Claude Agent Kit
 
-Claude Code plugin that ports the oh-my-opencode agent roster (as close to 1:1 as practical) using Anthropic models (Haiku/Sonnet/Opus).
+A multi-agent orchestration plugin for Claude Code. Provides persona-based workflows, planning and execution pipelines, specialist subagents, and continuation control using hooks, skills, subagents, and repo-local state files.
 
-## Try locally
+## Features
 
-From this repository root:
+- Ultrawork trigger via `ulw`/`ultrawork` keyword and `/claude-agent-kit:ulw` skill.
+- Plan to execution flow via `/claude-agent-kit:plan` and `/claude-agent-kit:start-work` using `.agent-kit/boulder.json`.
+- Bounded continuation enforcement in Stop hook with max blocks, cooldown, and escape hatch.
+- Session resume injection from active boulder state on `SessionStart`.
+- Leaf specialists: explore, librarian, oracle, metis, momus.
+- Main-session persona controls: `/claude-agent-kit:sisyphus`, `/claude-agent-kit:hephaestus`, `/claude-agent-kit:prometheus`, `/claude-agent-kit:atlas`.
 
-```bash
-claude --plugin-dir ./claude-agent-kit --debug
-```
+## Limitations
 
-Then in Claude Code:
-- `/help` to see skills
-- `/agents` to see agents
-- `/mcp` to see MCP servers (and authenticate if needed)
+- Hidden model override is not supported.
+- Native custom tools are not supported; use built-in tools and MCP wrappers.
+- Nested subagent orchestration is not supported.
+- Full tool output rewriting is not supported.
 
-## What you get
+## Security and Permissions
 
-Agents (under `/agents`):
-- `claude-agent-kit:sisyphus`
-- `claude-agent-kit:hephaestus`
-- `claude-agent-kit:oracle` (read-only)
-- `claude-agent-kit:librarian` (read-only)
-- `claude-agent-kit:explore` (read-only)
-- `claude-agent-kit:multimodal-looker` (read-only)
-- `claude-agent-kit:metis` (read-only)
-- `claude-agent-kit:momus` (read-only)
-- `claude-agent-kit:atlas`
-- `claude-agent-kit:prometheus` (read-only)
-- `claude-agent-kit:sisyphus-junior`
-- `claude-agent-kit:boulder` (bounded finisher; plugin-specific)
+Recommended posture (documentation only):
+- allow: Read, Grep, Glob
+- ask: Bash, Edit, Write, WebFetch, MCP
+- deny destructive bash patterns: `rm -rf`, `mkfs`, `dd if=`
 
-Skills (under `/claude-agent-kit:*`):
-- Workflows: `/claude-agent-kit:explore`, `/claude-agent-kit:plan`, `/claude-agent-kit:implement`, `/claude-agent-kit:review`, `/claude-agent-kit:boulder`
-- Agent entrypoints: `/claude-agent-kit:sisyphus`, `/claude-agent-kit:hephaestus`, `/claude-agent-kit:oracle`, `/claude-agent-kit:librarian`, `/claude-agent-kit:explore-agent`, `/claude-agent-kit:multimodal-looker`, `/claude-agent-kit:metis`, `/claude-agent-kit:momus`, `/claude-agent-kit:atlas`, `/claude-agent-kit:prometheus`, `/claude-agent-kit:sisyphus-junior`
-- Management: `/claude-agent-kit:configure`, `/claude-agent-kit:team-templates`
+The plugin does not ship a `settings.json` and does not auto-change user permissions.
 
-Docs:
-- `docs/routing.md`
-- `docs/agent-mapping.md`
+## Compatibility
 
-## Boulder safe gate (lint/test/build)
+- Target runtime: Claude Code plugin hooks with `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `Stop`.
+- Dependencies: `bash` required, `jq` optional (preferred for strict JSON handling).
+- Hook stdin fields can vary by Claude Code version; scripts use fallback extraction and fail-open behavior.
 
-`/claude-agent-kit:boulder ...` runs in a forked `boulder` subagent context.
+## Selftest Pass Criteria
 
-When `boulder` tries to stop, a plugin `SubagentStop` hook runs:
-- `scripts/safe-gate.sh`
+Selftest passes when:
+- evidence logs are written under `.agent-kit/evidence/<area>/...` for each scenario
+- plugin validation commands report no errors in a real plugin runtime
+- destructive Bash guard scenario is blocked
 
-If the gate fails, the hook exits 2, and Claude Code prevents the `boulder` subagent from stopping.
+## Smoke Run
 
-### Customizing the gate
-
-Option A: environment variable (semicolon-separated):
-
-```bash
-export CLAUDE_AGENT_KIT_SAFE_GATE_COMMANDS='bun run lint; bun test; bun run build'
-```
-
-Option B: project config file (in repo root): `claude-agent-kit.safe-gate.json`
-
-```json
-{
-  "commands": ["bun run lint", "bun test", "bun run build"]
-}
-```
-
-If neither is provided, the gate attempts to use `package.json` scripts `lint`, `test`, and `build`.
-
-## MCP servers
-
-This plugin includes `.mcp.json` with a GitHub MCP server definition. You may need to authenticate in Claude Code:
-- `/mcp` -> authenticate
-
-If you do not want plugin MCP servers running, disable them via your Claude Code settings or remove `.mcp.json`.
-
-## Namespacing
-
-Plugin skills are namespaced. A skill named `review` will show up as:
-
-- `/claude-agent-kit:review`
-
-Agents are namespaced in the `/agents` UI as:
-
-- `claude-agent-kit:<agent-name>`
-
-## Troubleshooting
-
-- Plugin loads but no skills/agents: ensure `agents/` and `skills/` are at plugin root, not under `.claude-plugin/`.
-- Hooks not firing: ensure `scripts/safe-gate.sh` is executable.
-- MCP server not connected: open `/mcp`, check plugin servers, and authenticate if required.
-- Stale plugin changes: bump version in `.claude-plugin/plugin.json` if you distribute via a marketplace (Claude Code caches installed plugins).
+1. Enable plugin in Claude Code.
+2. Run `/plugin validate` and `/plugin errors`.
+3. Run `/claude-agent-kit:selftest` and collect evidence under `.agent-kit/evidence/final/`.
+4. Confirm escape hatch works with `/claude-agent-kit:stop-continuation`.

@@ -1,0 +1,6 @@
+{
+  "name": "claude-agent-kit",
+  "version": "0.1.0",
+  "description": "Multi-agent orchestration plugin for Claude Code with personas, planning workflows, and continuation control",
+  "hooks": "./hooks/hooks.json"
+}
