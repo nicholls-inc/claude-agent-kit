@@ -20,11 +20,27 @@ jobs:
       - name: Install pytest
         run: pip install pytest
 
-      - name: Run validation tests
-        run: python3 -m pytest tests/test_validate.py -v
+      - name: Run tests
+        run: python3 -m pytest tests/ -v
+
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pytest
+        run: pip install pytest
 
       - name: Run evaluation suite
         run: python3 evals/run_evals.py
+
+      - name: Run evaluation tests
+        run: python3 -m pytest evals/tests/ -v
 
   prompt-regression:
     runs-on: ubuntu-latest
