@@ -58,8 +58,9 @@ This is a **pure-markdown Claude Code plugin** — a CLI plugin for Claude Code 
 - `agents/*.md` — Agent definitions (YAML frontmatter + markdown system prompt)
 - `skills/*/SKILL.md` — Skill definitions (YAML frontmatter + prompt template)
 - `hooks/hooks.json` — Hook configuration (JSON)
-- `scripts/` — Shell scripts: `hook-router.sh` (main hook dispatcher), `state-read.sh`, `state-write.sh`, `sanitize-hook-input.sh`, `detect-ulw.sh`
-- `tests/validate.sh` — Structural validation suite (the main test entry point)
+- `scripts/` — Python scripts: `hook_router.py` (main hook dispatcher), `state.py`, `sanitize.py`, `detect.py`, `build_sections.py`, `telemetry.py`, `prompt_version.py`
+- `tests/test_validate.py` — Structural validation suite (the main test entry point)
+- `tests/test_build_sections.py` — Unit tests for the dynamic prompt generator
 - `docs/` — Documentation markdown files
 - `design/` — Design and architecture documents
 
@@ -67,9 +68,9 @@ This is a **pure-markdown Claude Code plugin** — a CLI plugin for Claude Code 
 
 Traditional code coverage (line/branch/function) does **not** apply. Instead, "testing" means **structural and schema validation**.
 
-The main test entry point is `./tests/validate.sh`, which already validates:
+The main test entry point is `pytest tests/test_validate.py -v`, which already validates:
 
-- **Shell script linting**: `shellcheck` on all `scripts/*.sh`
+- **Python script syntax**: `py_compile` check on all `scripts/*.py`
 - **YAML frontmatter validation**: each `agents/*.md` and `skills/*/SKILL.md` must have valid YAML frontmatter with required fields
   - Agents require: `name`, `description`, `model`, `tools`, `maxTurns`
   - Skills require: `name`, `description`
@@ -78,7 +79,9 @@ The main test entry point is `./tests/validate.sh`, which already validates:
 - **Cross-reference integrity**: agents referenced in `docs/agent-mapping.md` must exist in `agents/`; skills in `skills/*/` must have `SKILL.md`
 - **Frontmatter field completeness**: required fields present, no unknown fields
 
-"Coverage" is measured as: what percentage of files/fields are validated, and whether all validations are passing. Focus your work on gaps **not yet covered** by `tests/validate.sh`.
+A secondary test suite `pytest tests/test_build_sections.py -v` provides unit tests for the dynamic prompt generator (`scripts/build_sections.py`).
+
+"Coverage" is measured as: what percentage of files/fields are validated, and whether all validations are passing. Focus your work on gaps **not yet covered** by `tests/test_validate.py`.
 
 **Scope**: Only test files outside of `.github/`. Do not validate workflow definitions or CI configuration.
 
@@ -138,7 +141,7 @@ To decide which phase to perform:
 
 1. **Goal selection**. Build an understanding of what to work on and select a specific validation gap to address.
 
-   a. Consult your memory notes in `/tmp/gh-aw/repo-memory-daily-test-improver/` (especially `build-notes.md`, `coverage-notes.md`, and `testing-notes.md`), and run the existing validation steps. If validation steps fail, create a fix PR, update memory notes, and exit.
+   a. Consult your memory notes in `/tmp/gh-aw/repo-memory-daily-test-improver/` (especially `build-notes.md`, `coverage-notes.md`, and `testing-notes.md`), and run the existing validation steps (`pytest tests/test_validate.py -v` and `pytest tests/test_build_sections.py -v`). If validation steps fail, create a fix PR, update memory notes, and exit.
 
    b. Review the validation results. Identify which files, fields, and structural checks are NOT yet validated. Look for areas where you can add meaningful checks that improve structural coverage.
 
@@ -150,13 +153,13 @@ To decide which phase to perform:
 
    f. If the plan needs updating, comment on the planning discussion with a revised plan and rationale. Consider maintainer feedback.
 
-   g. Based on all of the above, select a specific validation gap to address. Examples of gaps NOT yet covered by `tests/validate.sh`:
+   g. Based on all of the above, select a specific validation gap to address. Examples of gaps NOT yet covered by `tests/test_validate.py`:
       - Validate that `skills/*/SKILL.md` files with `context: fork` have an `agent:` field pointing to an existing agent
-      - Validate that all `scripts/*.sh` use `set -euo pipefail` as safety defaults
+      - Validate that all `scripts/*.py` include a `if __name__ == "__main__":` entry point (per project conventions)
       - Validate that model values in agent frontmatter are consistent with the allowed set in `docs/routing.md`
       - Validate that `hooks/hooks.json` hook commands reference scripts that actually exist
       - Validate that `STATE.md` conforms to expected structure (if format is documented)
-      - Add snapshot/regression checks: run `tests/validate.sh` and assert it exits 0
+      - Add snapshot/regression checks: run `pytest tests/test_validate.py -v` and assert it exits 0
 
 2. **Work towards your selected goal**.
 
@@ -170,9 +173,7 @@ To decide which phase to perform:
 
 3. **Finalizing changes**
 
-   a. Run `shellcheck` on any new shell scripts and fix any issues.
-
-   b. If Python scripts were written, ensure they are clean and work with `python3`.
+   a. If Python scripts were written, ensure they are clean and work with `python3`. Run `py_compile` or `pytest` to verify syntax and correctness.
 
 4. **Results and learnings**
 
