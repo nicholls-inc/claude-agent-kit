@@ -15,13 +15,18 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
+  discussions: read
 
 network: defaults
 
 safe-outputs:
+  create-discussion:
+    max: 1
+    title-prefix: "${{ github.workflow }} "
+    category: "ideas"
   create-issue:
     max: 1
-    labels: [automation, testing]
+    labels: [automation, testing, bug]
   add-comment:
     target: "*" # can add a comment to any one single issue or pull request
   create-pull-request:
@@ -30,7 +35,7 @@ safe-outputs:
 
 tools:
   github:
-    toolsets: [repos, issues, pull_requests]
+    toolsets: [repos, issues, pull_requests, discussions]
   repo-memory:
     - id: daily-test-improver
       description: "Persistent notes on build commands, coverage steps, and test strategies"
@@ -87,9 +92,9 @@ You are doing your work in phases. Right now you will perform just one of the fo
 
 To decide which phase to perform:
 
-1. First check for an existing open issue whose title **starts with** `"${{ github.workflow }}"` using `list_issues`. Double check the issue is actually still open — if it's closed, ignore it. If found and open, read it and maintainer comments. If not found, perform Phase 1 and nothing else.
+1. First check for an existing open discussion whose title **starts with** `"${{ github.workflow }}"` using `list_discussions`. Double check the discussion is actually still open — if it's closed, ignore it. If found and open, read it and maintainer comments. If not found, perform Phase 1 and nothing else.
 
-2. If that issue exists, then perform Phase 2.
+2. If that discussion exists, then perform Phase 2.
 
 ## Phase 1 - Testing research
 
@@ -106,7 +111,7 @@ To decide which phase to perform:
 
    You will need these notes for Phase 2.
 
-5. Create an issue with title "${{ github.workflow }} - Research and Plan" that includes:
+5. Create a discussion with title "${{ github.workflow }} - Research and Plan" that includes:
 
 - A summary of your findings about the repository, its testing strategies, its test coverage
 - A plan for how you will approach improving test coverage, including specific areas to focus on and strategies to use
@@ -115,9 +120,9 @@ To decide which phase to perform:
 - Opportunities for new ways of greatly increasing test coverage
 - Any questions or clarifications needed from maintainers
 
-   **Include a "How to Control this Workflow" section at the end of the issue that explains:**
+   **Include a "How to Control this Workflow" section at the end of the discussion that explains:**
 
-- The user can add comments to the issue to provide feedback or adjustments to the plan
+- The user can add comments to the discussion to provide feedback or adjustments to the plan
 - The user can use these commands:
 
       gh aw disable daily-test-improver --repo ${{ github.repository }}
@@ -125,7 +130,7 @@ To decide which phase to perform:
       gh aw run daily-test-improver --repo ${{ github.repository }} --repeat <number-of-repeats>
       gh aw logs daily-test-improver --repo ${{ github.repository }}
 
-   **Include a "What Happens Next" section at the end of the issue that explains:**
+   **Include a "What Happens Next" section at the end of the discussion that explains:**
 
 6. Exit this entire workflow, do not proceed to Phase 2 on this run. The coverage steps will now be checked by a human who will invoke you again and you will proceed to Phase 2.
 
@@ -137,13 +142,13 @@ To decide which phase to perform:
 
    b. Review the validation results. Identify which files, fields, and structural checks are NOT yet validated. Look for areas where you can add meaningful checks that improve structural coverage.
 
-   c. Read the plan in the issue identified above, along with any comments.
+   c. Read the plan in the discussion identified above, along with any comments.
 
    d. Check the most recent pull request with title starting with "${{ github.workflow }}" (it may have been closed) to understand what was done last time and what was recommended.
 
    e. Check for existing open pull requests with "${{ github.workflow }}" prefix. Avoid duplicate work.
 
-   f. If the plan needs updating, comment on the planning issue with a revised plan and rationale. Consider maintainer feedback.
+   f. If the plan needs updating, comment on the planning discussion with a revised plan and rationale. Consider maintainer feedback.
 
    g. Based on all of the above, select a specific validation gap to address. Examples of gaps NOT yet covered by `tests/validate.sh`:
       - Validate that `skills/*/SKILL.md` files with `context: fork` have an `agent:` field pointing to an existing agent
@@ -194,4 +199,4 @@ To decide which phase to perform:
 
    b. If you found real structural issues while adding validation (missing required fields, invalid references, etc.), create one single combined issue for all of them. Do not include fixes in your pull requests unless you are 100% certain the issue is real.
 
-5. **Final update**: Add a brief comment (1–2 sentences) to the planning issue stating the goal worked on, PR links, and progress made — including the validation coverage improvement achieved.
+5. **Final update**: Add a brief comment (1–2 sentences) to the planning discussion stating the goal worked on, PR links, and progress made — including the validation coverage improvement achieved.
