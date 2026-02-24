@@ -1,6 +1,6 @@
 [project]
 name = "claude-agent-kit-evals"
-version = "0.1.0"
+version = "1.0.0"
 description = "Evaluation scripts for the claude-agent-kit plugin"
 requires-python = ">=3.11"
 dependencies = [
