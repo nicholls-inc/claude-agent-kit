@@ -47,17 +47,6 @@ To keep credentials out of version control, use the local settings file instead 
 }
 ```
 
-### CI secrets
-
-In GitHub Actions, add repository secrets and expose them as environment variables in your workflow:
-
-```yaml
-env:
-  LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
-  LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
-  LANGFUSE_BASE_URL: ${{ secrets.LANGFUSE_BASE_URL }}
-```
-
 ## What Gets Traced
 
 The `scripts/telemetry.py` module sends events and scores to Langfuse via a fire-and-forget daemon thread. It never blocks the hook or the user.
