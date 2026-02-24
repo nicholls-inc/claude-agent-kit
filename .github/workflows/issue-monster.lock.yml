@@ -23,13 +23,13 @@
 #
 # The Cookie Monster of issues - assigns issues to Copilot coding agent one at a time
 #
-# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"859ec585525a3230d1f5f7f6b02b388feedcff0b6187fefb51dc966b33a0f71e","compiler_version":"v0.49.0"}
+# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"d412096e32d3063c5bd537ff9f6978f59d9e529955396ccfa768eb96635593dc","compiler_version":"v0.49.0"}
 
 name: "Issue Monster"
 "on":
   schedule:
-  - cron: "1 15 * * *"
-    # Friendly format: daily (scattered)
+  - cron: "*/30 * * * *"
+    # Friendly format: every 30m
   # skip-if-match: # Skip-if-match processed as search check in pre-activation job
     # max: 5
     # query: is:pr is:open is:draft author:app/copilot-swe-agent
