@@ -2,10 +2,19 @@
 
 import sys
 import importlib
+import types
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "llm-judge"))
+
+langfuse_stub = types.ModuleType("langfuse")
+langfuse_stub.Langfuse = type("Langfuse", (), {})
+sys.modules.setdefault("langfuse", langfuse_stub)
+
+anthropic_stub = types.ModuleType("anthropic")
+anthropic_stub.Anthropic = type("Anthropic", (), {})
+sys.modules.setdefault("anthropic", anthropic_stub)
 
 judge_persona = importlib.import_module("judge-persona")
 judge_plan = importlib.import_module("judge-plan")
