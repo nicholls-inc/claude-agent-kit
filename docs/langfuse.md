@@ -11,7 +11,7 @@ Tracing is **opt-in**: nothing is sent unless all three environment variables ar
 
 ## Configuration
 
-Set the following environment variables before starting Claude Code:
+The plugin reads the following environment variables:
 
 | Variable | Description |
 |---|---|
@@ -19,24 +19,32 @@ Set the following environment variables before starting Claude Code:
 | `LANGFUSE_SECRET_KEY` | Secret API key from your Langfuse project |
 | `LANGFUSE_BASE_URL` | Base URL of your Langfuse instance (e.g. `https://cloud.langfuse.com` or `http://localhost:3000`) |
 
-### Shell profile
+### `.claude/settings.json` (shared / team)
 
-Add to `~/.zshrc`, `~/.bashrc`, or equivalent:
+Claude Code plugins receive environment variables from the `env` key in `.claude/settings.json`. Add the three keys to that file:
 
-```bash
-export LANGFUSE_PUBLIC_KEY="pk-lf-..."
-export LANGFUSE_SECRET_KEY="sk-lf-..."
-export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+```json
+{
+  "env": {
+    "LANGFUSE_PUBLIC_KEY": "pk-lf-...",
+    "LANGFUSE_SECRET_KEY": "sk-lf-...",
+    "LANGFUSE_BASE_URL": "https://cloud.langfuse.com"
+  }
+}
 ```
 
-### `.env` file
+### `.claude/settings.local.json` (personal / gitignored)
 
-If you use a `.env` loader, add to your project `.env`:
+To keep credentials out of version control, use the local settings file instead (add it to `.gitignore`):
 
-```
-LANGFUSE_PUBLIC_KEY=pk-lf-...
-LANGFUSE_SECRET_KEY=sk-lf-...
-LANGFUSE_BASE_URL=https://cloud.langfuse.com
+```json
+{
+  "env": {
+    "LANGFUSE_PUBLIC_KEY": "pk-lf-...",
+    "LANGFUSE_SECRET_KEY": "sk-lf-...",
+    "LANGFUSE_BASE_URL": "https://cloud.langfuse.com"
+  }
+}
 ```
 
 ### CI secrets
@@ -91,12 +99,6 @@ Use the **Dashboards** feature to build charts across traces — refer to [`eval
 
 ## Disabling Tracing
 
-Tracing is automatically disabled when any of the three environment variables is missing or empty. To disable tracing without removing variables, unset them in your shell:
-
-```bash
-unset LANGFUSE_PUBLIC_KEY
-unset LANGFUSE_SECRET_KEY
-unset LANGFUSE_BASE_URL
-```
+Tracing is automatically disabled when any of the three environment variables is missing or empty. To disable tracing, remove the Langfuse keys from the `env` block in your `.claude/settings.json` or `.claude/settings.local.json` file, or delete the `env` block entirely.
 
 Hooks continue to operate normally when Langfuse is not configured — the telemetry calls are no-ops.
