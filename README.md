@@ -2,6 +2,8 @@
 
 A multi-agent orchestration plugin for Claude Code. Provides persona-based workflows, planning and execution pipelines, specialist subagents, and continuation control using hooks, skills, subagents, and repo-local state files.
 
+It's essentially a port of [oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode) for Claude Code.
+
 ## Features
 
 - Ultrawork trigger via `ulw`/`ultrawork` keyword and `/claude-agent-kit:ulw` skill.
